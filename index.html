@@ -764,11 +764,10 @@ try{var rescued=sessionStorage.getItem('bulletin-rescued');if(rescued){sessionSt
 (function(){
 var SELKEY='weekly-bulletin-select-v1';
 var sel=[];
-try{sel=JSON.parse(localStorage.getItem(SELKEY)||'[]');}catch(_){sel=[];}
-if(!Array.isArray(sel))sel=[];
+// 不預設勾選：每次開啟頁面都從零開始，不從 localStorage 恢復舊勾選，舊勾選一律清除，避免上次測試的 3 張被誤當成預設再分享出去。
+try{localStorage.removeItem(SELKEY);}catch(_){}
 var editDel=[];
 try{var es=JSON.parse(localStorage.getItem('weekly-bulletin-edit-v1')||'{}');editDel=es.deletedCards||[];}catch(_){}
-sel=sel.filter(function(ci){return editDel.indexOf(ci)<0;});
 function saveSel(){try{localStorage.setItem(SELKEY,JSON.stringify(sel));}catch(_){}}
 var cards=[];
 document.querySelectorAll('.card').forEach(function(card,idx){
@@ -894,7 +893,7 @@ async function shareNextSequential(){
     else{throw new Error('系統分享不支援');}
     seqIndex++;
     if(seqIndex<seqFiles.length){openBatchFallback('逐張分享','第 '+seqIndex+'/'+seqFiles.length+' 張已分享，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」繼續傳到 LINE。',true,true,false);}
-    else{alert('全部 '+seqFiles.length+' 張已逐張分享完畢');}
+    else{alert('全部 '+seqFiles.length+' 張已逐張分享完畢');sel=[];try{localStorage.removeItem(SELKEY);}catch(_){}cards.forEach(function(c){var b=c.querySelector('.selcircle');if(b){b.classList.remove('on');b.setAttribute('aria-pressed','false');}});updateCount();seqFiles=null;seqIndex=0;}
   }catch(e){
     if(e && e.name==='AbortError'){openBatchFallback('逐張分享已取消','已分享 '+seqIndex+' 張，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」可繼續；已取消的不算已分享。',true,true,false);}
     else{openBatchFallback('逐張分享失敗','第 '+(seqIndex+1)+' 張分享失敗：'+(e&&e.message?e.message:e)+'，已分享 '+seqIndex+' 張，尚餘 '+(seqFiles.length-seqIndex)+' 張，可重試下一張或改用下載全部圖片。',true,true,false);}
