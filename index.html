@@ -21,8 +21,27 @@ h1{font-size:26px;margin:8px 0 12px;color:#111}
 .actions button{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer}
 .cbody.collapsed{display:none}
 .foot{color:#555;font-size:14px;margin-top:24px}
+
+.hint{color:#666;font-size:14px;margin:2px 0 10px}
+#restoreAll{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer}
+.card,.row{-webkit-touch-callout:none}
+body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select:none!important}
+.row{border:none!important;background:transparent!important}
+.actions button{font-weight:700}
+#editModal,#delModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
+#delModal{z-index:210}
+#editModal.open,#delModal.open{display:flex}
+.edit-box{background:#fff;color:#111;border:3px solid #333;border-radius:12px;width:100%;max-width:560px;padding:16px}
+.edit-box textarea,.edit-box input{width:100%;box-sizing:border-box;font-size:16px;padding:8px;border:2px solid #333;border-radius:8px;background:#fff;color:#111}
+.edit-box textarea{min-height:160px;line-height:1.7}
+.iconrow{display:flex;gap:12px;margin-top:12px}
+.iconbtn{width:48px;height:48px;border-radius:50%;border:2px solid #333;background:#fff;color:#111;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.iconbtn.danger{border-color:#D32F2F;color:#D32F2F}
+.iconbtn.ok{border-color:#2E7D32;color:#2E7D32}
 </style></head><body><div class="wrap">
 <h1>2026年10月28日</h1>
+<p class="hint">長按任一小卡可編輯／刪除</p>
+<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button></div>
 <div class="filters" id="filters">
 <button data-f="all" class="on">全部</button><button data-f="A">A 馬上執行</button><button data-f="B">B 近期班期</button><button data-f="C">C 公告參考</button>
 <span class="fonts" style="margin-left:auto"><button id="fsDown">A-</button><button id="fsUp">A+</button></span>
@@ -557,13 +576,140 @@ document.getElementById('fsDown').onclick=()=>{fs=Math.max(14,fs-1);document.bod
 document.querySelectorAll('#filters button[data-f]').forEach(b=>{b.onclick=()=>{document.querySelectorAll('#filters button[data-f]').forEach(x=>x.classList.remove('on'));b.classList.add('on');const f=b.dataset.f;document.querySelectorAll('.card').forEach(c=>{c.style.display=(f==='all'||c.dataset.cat===f)?'':'none'});}});
 const cb=document.getElementById('cBody'),ct=document.getElementById('cToggle');
 if(ct){ct.onclick=()=>{const h=cb.classList.toggle('collapsed');ct.textContent=h?'展開':'收合'};}
-function cardText(card){let t=card.querySelector('h2').innerText+'
-'+card.querySelector('.badge').innerText+'
-';card.querySelectorAll('.row').forEach(r=>{t+=r.querySelector('.k').innerText+'
-';r.querySelectorAll('.line').forEach(l=>{t+=l.innerText+'
-'});});return t;}
+function cardText(card){var NL=String.fromCharCode(10);var t=card.querySelector('h2').innerText+NL+card.querySelector('.badge').innerText+NL;card.querySelectorAll('.row').forEach(function(r){if(r.style.display==='none')return;t+=r.querySelector('.k').innerText+NL;r.querySelectorAll('.line').forEach(function(l){t+=l.innerText+NL;});});return t;}
 document.querySelectorAll('.card').forEach(card=>{
 card.querySelector('.copy').onclick=async()=>{const t=cardText(card);try{await navigator.clipboard.writeText(t);alert('已複製文字')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('已複製文字')}};
-card.querySelector('.share').onclick=async()=>{if(!window.html2canvas){alert('圖片產生器未載入，請先用複製文字');return;}const acts=card.querySelector('.actions');acts.style.display='none';try{const cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});const url=cv.toDataURL('image/png');const a=document.createElement('a');a.href=url;a.download='meeting-card.png';a.click();window.open(url,'_blank');}catch(e){alert('圖片產生失敗：'+e.message)}finally{acts.style.display=''}};
+card.querySelector('.share').onclick=async()=>{
+if(!window.html2canvas){
+  try{await new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}catch(_){}
+}
+if(!window.html2canvas){alert('圖片產生器載入失敗，請檢查網路後重試，或先用複製文字');return;}
+const acts=card.querySelector('.actions');acts.style.display='none';
+try{
+  const cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
+  const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
+  if(!blob)throw new Error('無法產生圖片檔案');
+  const file=new File([blob],'meeting-card.png',{type:'image/png'});
+  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+    try{await navigator.share({files:[file],title:card.querySelector('h2').innerText});return;}
+    catch(se){if(se && se.name==='AbortError')return;}
+  }
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='meeting-card.png';document.body.appendChild(a);a.click();a.remove();
+  window.open(url,'_blank');
+  alert('系統分享不支援，已開啟圖片分頁，請用系統分享鍵傳到 LINE，或在下載資料夾找 meeting-card.png');
+}catch(e){alert('圖片產生失敗：'+(e&&e.message?e.message:e));}
+finally{acts.style.display='';}
+};
 });
-</script></body></html>
+</script>
+<div id="editModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 id="editTitle" style="margin-top:0"></h3><div id="editFields"></div><div class="iconrow"><button class="iconbtn ok" id="editSave" aria-label="儲存" title="儲存">✓</button><button class="iconbtn" id="editCancel" aria-label="取消" title="取消">↩</button><button class="iconbtn danger" id="editDelete" aria-label="刪除" title="刪除">✖️</button></div></div></div>
+<div id="delModal" role="dialog" aria-modal="true"><div class="edit-box"><p id="delText">確定要刪除這一項嗎？</p><div class="iconrow"><button class="iconbtn danger" id="delConfirm" aria-label="確認刪除" title="確認刪除">✓</button><button class="iconbtn" id="delCancel" aria-label="取消" title="取消">↩</button></div></div></div>
+<script>
+(function(){
+var LS='weekly-bulletin-edit-v1';
+var state={deletedCards:[],deletedRows:[],editedRows:{},editedCards:{}};
+try{state=Object.assign(state,JSON.parse(localStorage.getItem(LS)||'{}'));}catch(_){}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(_){}}
+var NL10=String.fromCharCode(10);
+var cards=[];
+document.querySelectorAll('.card').forEach(function(card,ci){
+  cards.push(card);card.dataset.ci=ci;
+  card.querySelectorAll('.row').forEach(function(row,ri){
+    row.dataset.ri=ri;
+    var key=ci+':'+ri;
+    if(state.deletedRows.indexOf(key)>=0)row.style.display='none';
+    if(state.editedRows[key]){
+      var v=row.querySelector('.v');v.innerHTML='';
+      state.editedRows[key].forEach(function(t){var d=document.createElement('div');d.className='line';d.textContent=t;v.appendChild(d);});
+    }
+  });
+  if(state.deletedCards.indexOf(ci)>=0)card.style.display='none';
+  if(state.editedCards[ci]){
+    var h=card.querySelector('h2');if(h)h.textContent=state.editedCards[ci].title;
+    var b=card.querySelector('.badge');if(b)b.textContent=state.editedCards[ci].badge;
+  }
+});
+var restore=document.getElementById('restoreAll');
+if(restore)restore.onclick=function(){try{localStorage.removeItem(LS);}catch(_){}location.reload();};
+var editModal=document.getElementById('editModal'),delModal=document.getElementById('delModal');
+var editTitle=document.getElementById('editTitle'),editFields=document.getElementById('editFields');
+var target=null,pendingDelete=null,suppressClickUntil=0;
+function openEdit(){editModal.classList.add('open');}
+function closeEdit(){editModal.classList.remove('open');target=null;}
+function openDel(text,fn){document.getElementById('delText').textContent=text;pendingDelete=fn;delModal.classList.add('open');}
+function closeDel(){delModal.classList.remove('open');pendingDelete=null;}
+document.getElementById('editCancel').onclick=closeEdit;
+document.getElementById('delCancel').onclick=closeDel;
+document.getElementById('delConfirm').onclick=function(){var fn=pendingDelete;closeDel();closeEdit();if(fn)fn();};
+document.getElementById('editSave').onclick=function(){
+  if(!target)return;
+  if(target.kind==='row'){
+    var lines=document.getElementById('editArea').value.split(NL10);
+    var v=target.row.querySelector('.v');v.innerHTML='';
+    lines.forEach(function(t){var d=document.createElement('div');d.className='line';d.textContent=t;v.appendChild(d);});
+    state.editedRows[target.card.dataset.ci+':'+target.row.dataset.ri]=lines;
+  }else{
+    var title=document.getElementById('editTitleInput').value;
+    var badge=document.getElementById('editBadgeInput').value;
+    var h=target.card.querySelector('h2');if(h)h.textContent=title;
+    var b=target.card.querySelector('.badge');if(b)b.textContent=badge;
+    state.editedCards[target.card.dataset.ci]={title:title,badge:badge};
+  }
+  persist();closeEdit();
+};
+document.getElementById('editDelete').onclick=function(){
+  if(!target)return;
+  if(target.kind==='row'){
+    var card=target.card,row=target.row;
+    openDel('確定要刪除這一項小卡嗎？',function(){row.style.display='none';var key=card.dataset.ci+':'+row.dataset.ri;if(state.deletedRows.indexOf(key)<0)state.deletedRows.push(key);persist();});
+  }else{
+    var card2=target.card;
+    openDel('確定要刪除整張大卡嗎？',function(){card2.style.display='none';var ci=Number(card2.dataset.ci);if(state.deletedCards.indexOf(ci)<0)state.deletedCards.push(ci);persist();});
+  }
+};
+function openSmallEdit(card,row){
+  var k=row.querySelector('.k');editTitle.textContent=card.querySelector('h2').textContent+' — '+(k?k.textContent:'');
+  var lines=[];row.querySelectorAll('.line').forEach(function(l){lines.push(l.textContent);});
+  editFields.innerHTML='<textarea id="editArea"></textarea>';
+  document.getElementById('editArea').value=lines.join(NL10);
+  target={kind:'row',card:card,row:row};openEdit();
+}
+function openBigEdit(card){
+  editTitle.textContent='編輯大卡';
+  editFields.innerHTML='<label>標題<br><input id="editTitleInput"></label><br><label>日期<br><input id="editBadgeInput"></label>';
+  document.getElementById('editTitleInput').value=card.querySelector('h2').textContent;
+  document.getElementById('editBadgeInput').value=card.querySelector('.badge').textContent;
+  target={kind:'card',card:card};openEdit();
+}
+function bindLP(el,fn){
+  var timer=null,sx=0,sy=0;
+  el.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    if(e.target.closest('.actions,button,a,input,textarea'))return;
+    sx=e.clientX;sy=e.clientY;
+    document.body.classList.add('lp-holding');
+    timer=setTimeout(function(){
+      document.body.classList.remove('lp-holding');
+      try{if(navigator.vibrate)navigator.vibrate(30);}catch(_){}
+      suppressClickUntil=Date.now()+600;fn();
+    },700);
+  });
+  el.addEventListener('pointermove',function(e){
+    if(timer&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)){clearTimeout(timer);timer=null;document.body.classList.remove('lp-holding');}
+  });
+  var cancel=function(){if(timer){clearTimeout(timer);timer=null;}document.body.classList.remove('lp-holding');};
+  el.addEventListener('pointerup',cancel);el.addEventListener('pointercancel',cancel);el.addEventListener('pointerleave',cancel);
+  window.addEventListener('scroll',cancel,{passive:true});
+  el.addEventListener('contextmenu',function(e){e.preventDefault();});
+  el.addEventListener('click',function(e){if(Date.now()<suppressClickUntil){e.preventDefault();e.stopPropagation();}},true);
+}
+cards.forEach(function(card){
+  card.querySelectorAll('.row').forEach(function(row){bindLP(row,function(){openSmallEdit(card,row);});});
+  var badge=card.querySelector('.badge');if(badge)bindLP(badge,function(){openBigEdit(card);});
+  var h=card.querySelector('h2');if(h)bindLP(h,function(){openBigEdit(card);});
+});
+document.querySelectorAll('.card').forEach(function(c){c.addEventListener('contextmenu',function(e){e.preventDefault();});});
+})();
+</script>
+</body></html>
