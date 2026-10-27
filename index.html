@@ -619,7 +619,7 @@ try{
   if(!blob)throw new Error('無法產生圖片檔案');
   const file=new File([blob],'meeting-card.png',{type:'image/png'});
   if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
-    try{await navigator.share({files:[file],title:card.querySelector('h2').innerText});return;}
+    try{await navigator.share({files:[file]});return;}
     catch(se){if(se && se.name==='AbortError')return;}
   }
   const url=URL.createObjectURL(blob);
@@ -890,7 +890,7 @@ async function shareNextSequential(){
   if(!seqFiles||seqIndex>=seqFiles.length){alert('全部已分享');return;}
   var file=seqFiles[seqIndex];
   try{
-    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'每週會議快訊'});}
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){await navigator.share({files:[file]});}
     else{throw new Error('系統分享不支援');}
     seqIndex++;
     if(seqIndex<seqFiles.length){openBatchFallback('逐張分享','第 '+seqIndex+'/'+seqFiles.length+' 張已分享，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」繼續傳到 LINE。',true,true,false);}
@@ -916,7 +916,7 @@ async function shareSelectedMultiFile(){
   }
   try{
     if(navigator.share && (!navigator.canShare || navigator.canShare({files:files}))){
-      await navigator.share({files:files,title:'每週會議快訊'});return;
+      await navigator.share({files:files});return;
     }
     throw new Error('系統不支援一次分享多張圖片');
   }catch(e){
