@@ -832,6 +832,60 @@ function downloadAllFiles(files){
 document.getElementById('batchFallbackDownload').onclick=function(){var f=batchFiles||seqFiles;closeBatchFallback();downloadAllFiles(f);};
 document.getElementById('batchFallbackSeq').onclick=async function(){closeBatchFallback();await shareNextSequential();};
 document.getElementById('batchFallbackMulti').onclick=async function(){closeBatchFallback();await shareSelectedMultiFile();};
+async function generateSelectedFiles(){
+  if(!sel||sel.length===0){alert('請先勾選要分享的大卡');return null;}
+  if(!(await ensureCanvas())){throw new Error('圖片產生器載入失敗，請檢查網路後重試，或先用複製文字');}
+  var deletedCards=[];
+  try{var es=JSON.parse(localStorage.getItem('weekly-bulletin-edit-v1')||'{}');deletedCards=es.deletedCards||[];}catch(_){}
+  var ordered=sel.slice().sort(function(a,b){return Number(a)-Number(b);});
+  var targets=[];
+  ordered.forEach(function(ci){
+    ci=Number(ci);
+    if(deletedCards.indexOf(ci)>=0)return;
+    var card=cards[ci];
+    if(!card)return;
+    if(card.style.display==='none'&&deletedCards.indexOf(ci)>=0)return;
+    targets.push({ci:ci,card:card});
+  });
+  if(targets.length===0){alert('已選的大卡皆已被刪除，請重新勾選');return null;}
+  var cBody=document.getElementById('cBody');
+  var wasCollapsed=!!(cBody&&cBody.classList.contains('collapsed'));
+  if(wasCollapsed)cBody.classList.remove('collapsed');
+  var files=[];var failed=[];
+  try{
+    for(var i=0;i<targets.length;i++){
+      var card=targets[i].card;
+      var savedDisplay=card.style.display;
+      var acts=card.querySelector('.actions');
+      var selHide=card.querySelector('.selcircle');
+      var savedActs=acts?acts.style.display:'';
+      var savedSel=selHide?selHide.style.display:'';
+      card.style.display='';
+      if(acts)acts.style.display='none';
+      if(selHide)selHide.style.display='none';
+      try{
+        var cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
+        var blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
+        if(!blob)throw new Error('無法產生圖片檔案');
+        var titleEl=card.querySelector('h2');
+        var title=titleEl?titleEl.textContent:'第 '+(i+1)+' 張';
+        files.push(new File([blob],'meeting-card-'+String(i+1).padStart(2,'0')+'.png',{type:'image/png'}));
+      }catch(e){
+        var titleEl2=card.querySelector('h2');
+        failed.push('第 '+(i+1)+' 張「'+(titleEl2?titleEl2.textContent:'')+'」：'+(e&&e.message?e.message:e));
+      }finally{
+        if(acts)acts.style.display=savedActs;
+        if(selHide)selHide.style.display=savedSel;
+        card.style.display=savedDisplay;
+      }
+    }
+  }finally{
+    if(wasCollapsed)cBody.classList.add('collapsed');
+  }
+  if(failed.length>0){throw new Error('圖片產生失敗 '+failed.length+' 張（已成功 '+files.length+' 張，失敗的圖片未計入分享）：'+failed.join('；'));}
+  if(files.length===0){throw new Error('沒有可分享的圖片');}
+  return files;
+}
 async function shareNextSequential(){
   if(!seqFiles||seqIndex>=seqFiles.length){alert('全部已分享');return;}
   var file=seqFiles[seqIndex];
