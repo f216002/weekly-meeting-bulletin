@@ -1,0 +1,6 @@
+{
+  "drive_folder_id": "1qvrAUTIDoeesYxtxWRMIl_Yef4w6YEB3",
+  "drive_folder_url": "https://drive.google.com/drive/folders/1qvrAUTIDoeesYxtxWRMIl_Yef4w6YEB3?usp=sharing",
+  "drive_structure": "根資料夾下分月夾（7月／8月／9月／10月），每個月夾下再分每週子夾，命名如 115MMDD會議議題，裡面有主檔 docx/pdf 與附件。",
+  "drive_access_note": "本設定只記錄資料夾 ID。透過 Drive API 自動讀取仍需 Cheng 完成分享／憑證設定（例如把資料夾分享給執行 Action 的帳號，並把憑證放進 GitHub Secrets，絕不在程式碼或文件中放密碼）。在該設定完成前，每週流程以後備方式進行：把主檔放進本倉庫 input/ 資料夾並推送，Action 會用同樣的最新檔規則產生草稿。不要把資料夾設成公開連結。"
+}
