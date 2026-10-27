@@ -1,0 +1,19 @@
+name: Generate draft (never auto-publish)
+on:
+  push:
+    paths: ["input/**", "scripts/**"]
+  workflow_dispatch:
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run newest-file self-test
+        run: python3 scripts/select_newest.py
+      - name: Draft gate reminder
+        run: |
+          echo "Draft only. Do NOT copy any draft to index.html until Cheng has checked and confirmed it."
+          echo "See RULES.md section 6 for the publish gate."
