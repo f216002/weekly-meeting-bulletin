@@ -50,10 +50,24 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 @keyframes selpop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
 .row,.card{transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
 .lp-press{transform:translateY(-2px) scale(1.01)!important;box-shadow:0 8px 18px rgba(0,0,0,.20)!important;background:#fffdf0!important}
+#deletedBtn{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer}
+#undoBar{position:fixed;left:12px;right:12px;bottom:12px;background:#111;color:#fff;padding:10px 12px;border-radius:12px;display:none;align-items:center;gap:10px;z-index:300;font-size:15px}
+#undoBar.show{display:flex}
+#undoBar button{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer}
+#deletedModal,#batchFallbackModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:220;padding:16px}
+#batchFallbackModal{z-index:230}
+#deletedModal.open,#batchFallbackModal.open{display:flex}
+.deleted-list{max-height:60vh;overflow:auto}
+.deleted-item{border-bottom:1px solid #ddd;padding:10px 0;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.deleted-item .meta{color:#555;font-size:14px}
+.deleted-item button{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer;flex:0 0 auto}
+.modalbtn{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:8px 14px;font-size:15px;cursor:pointer}
+.rescued-flash{outline:3px solid #FF9800!important;background:#FFF9C4!important}
+#batchNote{color:#555;font-size:14px;margin:2px 0 10px}
 </style></head><body><div class="wrap">
 <h1>2026年10月28日</h1>
 <p class="hint">長按任一小卡可編輯／刪除</p>
-<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button></div>
+<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelBatches" type="button" disabled>分批分享</button></div><p id="batchNote">批次分享是一次傳多張圖，每張圖和單卡分享時一模一樣，未合併、未縮小；若 LINE 只收到第一張，請改用分批分享。</p>
 <div class="filters" id="filters">
 <button data-f="all" class="on">全部</button><button data-f="A">A 馬上執行</button><button data-f="B">B 近期班期</button><button data-f="C">C 公告參考</button>
 <span class="fonts" style="margin-left:auto"><button id="fsDown">A-</button><button id="fsUp">A+</button></span>
@@ -617,11 +631,15 @@ finally{acts.style.display='';var selBack=card.querySelector('.selcircle');if(se
 </script>
 <div id="editModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 id="editTitle" style="margin-top:0"></h3><div id="editFields"></div><div class="iconrow"><button class="iconbtn ok" id="editSave" aria-label="儲存" title="儲存">✓</button><button class="iconbtn" id="editCancel" aria-label="取消" title="取消">↩</button><button class="iconbtn danger" id="editDelete" aria-label="刪除" title="刪除">✖️</button></div></div></div>
 <div id="delModal" role="dialog" aria-modal="true"><div class="edit-box"><p id="delText">確定要刪除這一項嗎？</p><div class="iconrow"><button class="iconbtn danger" id="delConfirm" aria-label="確認刪除" title="確認刪除">✓</button><button class="iconbtn" id="delCancel" aria-label="取消" title="取消">↩</button></div></div></div>
+<div id="deletedModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0">已刪除的項目</h3><div id="deletedList" class="deleted-list"></div><div class="iconrow"><button class="modalbtn" id="deletedClose" type="button">關閉</button></div></div></div>
+<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackBatches" type="button">分批分享（每批5張）</button><button class="modalbtn" id="batchFallbackDownload" type="button">逐張下載</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
+<div id="undoBar" role="status"><span id="undoText"></span><span style="flex:1"></span><button id="undoRestore" type="button">復原</button><button id="undoClose" type="button">✕</button></div>
 <script>
 (function(){
 var LS='weekly-bulletin-edit-v1';
 var state={deletedCards:[],deletedRows:[],editedRows:{},editedCards:{}};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(LS)||'{}'));}catch(_){}
+if(!state.deletedMeta)state.deletedMeta={rows:{},cards:{}};
 function persist(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(_){}}
 var NL10=String.fromCharCode(10);
 var cards=[];
@@ -644,6 +662,20 @@ document.querySelectorAll('.card').forEach(function(card,ci){
 });
 var restore=document.getElementById('restoreAll');
 if(restore)restore.onclick=function(){try{localStorage.removeItem(LS);}catch(_){}location.reload();};
+function escHtml2(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cardTitleOf(card){var h=card.querySelector('h2');return h?h.textContent:'';}
+function rowMeta(card,row,key){var m=(state.deletedMeta.rows&&state.deletedMeta.rows[key])||null;if(m)return m;var k=row.querySelector('.k');var first=row.querySelector('.line');return{card:cardTitleOf(card),field:k?k.textContent:'',preview:first?first.textContent:'',edited:!!state.editedRows[key]};}
+function cardMeta(card,ci){var m=(state.deletedMeta.cards&&state.deletedMeta.cards[ci])||null;if(m)return m;var b=card.querySelector('.badge');return{title:cardTitleOf(card),badge:b?b.textContent:'',edited:!!state.editedCards[ci],selected:false};}
+function updateDeletedBtn(){var b=document.getElementById('deletedBtn');if(!b)return;var n=state.deletedRows.length+state.deletedCards.length;b.textContent=n>0?'已刪除（'+n+'）':'已刪除';}
+function rescueAndReload(kind,id){if(kind==='row'){var ix=state.deletedRows.indexOf(id);if(ix>=0)state.deletedRows.splice(ix,1);if(state.deletedMeta.rows)delete state.deletedMeta.rows[id];}else{var ci=Number(id);var ix2=state.deletedCards.indexOf(ci);if(ix2>=0)state.deletedCards.splice(ix2,1);var meta=state.deletedMeta.cards?state.deletedMeta.cards[ci]:null;if(state.deletedMeta.cards)delete state.deletedMeta.cards[ci];if(meta&&meta.selected){try{var sArr=JSON.parse(localStorage.getItem('weekly-bulletin-select-v1')||'[]');if(sArr.indexOf(ci)<0){sArr.push(ci);localStorage.setItem('weekly-bulletin-select-v1',JSON.stringify(sArr));}}catch(_){}}}persist();try{sessionStorage.setItem('bulletin-rescued',kind+'|'+id);}catch(_){}location.reload();}
+var undoTimer=null,undoTarget=null;
+function showUndo(label,kind,id){var bar=document.getElementById('undoBar');if(!bar)return;document.getElementById('undoText').textContent='已刪除「'+label+'」';undoTarget={kind:kind,id:id};bar.classList.add('show');if(undoTimer)clearTimeout(undoTimer);undoTimer=setTimeout(function(){bar.classList.remove('show');},12000);}
+document.getElementById('undoRestore').onclick=function(){if(!undoTarget)return;var t=undoTarget;document.getElementById('undoBar').classList.remove('show');rescueAndReload(t.kind,t.id);};
+document.getElementById('undoClose').onclick=function(){document.getElementById('undoBar').classList.remove('show');};
+function openDeletedModal(){var list=document.getElementById('deletedList');if(!list)return;var html='';state.deletedRows.forEach(function(key){var parts=key.split(':');var ci=Number(parts[0]);var card=cards[ci];if(!card)return;var row=card.querySelectorAll('.row')[Number(parts[1])];if(!row)return;var m=rowMeta(card,row,key);html+='<div class="deleted-item"><div><div><strong>'+escHtml2(m.card)+' — '+escHtml2(m.field)+'</strong></div><div class="meta">'+escHtml2(m.preview)+(m.edited?'（曾編輯，救回後保留編輯後內容）':'')+'</div></div><button type="button" data-kind="row" data-id="'+escHtml2(key)+'">復原</button></div>';});state.deletedCards.forEach(function(ci){var card=cards[ci];if(!card)return;var m=cardMeta(card,ci);html+='<div class="deleted-item"><div><div><strong>'+escHtml2(m.title)+'（整張大卡）</strong></div><div class="meta">'+escHtml2(m.badge)+(m.edited?'（曾編輯，救回後保留編輯後內容）':'')+(m.selected?'（救回後恢復勾選）':'')+'</div></div><button type="button" data-kind="card" data-id="'+ci+'">復原</button></div>';});if(!html)html='<p>目前沒有已刪除的項目。</p>';list.innerHTML=html;list.querySelectorAll('button[data-kind]').forEach(function(b){b.onclick=function(){rescueAndReload(b.getAttribute('data-kind'),b.getAttribute('data-id'));};});document.getElementById('deletedModal').classList.add('open');}
+document.getElementById('deletedBtn').onclick=openDeletedModal;
+document.getElementById('deletedClose').onclick=function(){document.getElementById('deletedModal').classList.remove('open');};
+updateDeletedBtn();
 var editModal=document.getElementById('editModal'),delModal=document.getElementById('delModal');
 var editTitle=document.getElementById('editTitle'),editFields=document.getElementById('editFields');
 var target=null,pendingDelete=null,suppressClickUntil=0;
@@ -674,10 +706,10 @@ document.getElementById('editDelete').onclick=function(){
   if(!target)return;
   if(target.kind==='row'){
     var card=target.card,row=target.row;
-    openDel('確定要刪除這一項小卡嗎？',function(){row.style.display='none';var key=card.dataset.ci+':'+row.dataset.ri;if(state.deletedRows.indexOf(key)<0)state.deletedRows.push(key);persist();});
+    openDel('確定要刪除這一項小卡嗎？',function(){row.style.display='none';var key=card.dataset.ci+':'+row.dataset.ri;var fk=row.querySelector('.k');var fl=row.querySelector('.line');if(state.deletedRows.indexOf(key)<0)state.deletedRows.push(key);state.deletedMeta.rows[key]={card:cardTitleOf(card),field:fk?fk.textContent:'',preview:fl?fl.textContent:'',edited:!!state.editedRows[key]};persist();showUndo(cardTitleOf(card)+' — '+(fk?fk.textContent:''),'row',key);updateDeletedBtn();});
   }else{
     var card2=target.card;
-    openDel('確定要刪除整張大卡嗎？',function(){card2.style.display='none';var ci=Number(card2.dataset.ci);if(state.deletedCards.indexOf(ci)<0)state.deletedCards.push(ci);try{var sArr=JSON.parse(localStorage.getItem('weekly-bulletin-select-v1')||'[]');var sIx=sArr.indexOf(ci);if(sIx>=0){sArr.splice(sIx,1);localStorage.setItem('weekly-bulletin-select-v1',JSON.stringify(sArr));}}catch(_){}persist();});
+    openDel('確定要刪除整張大卡嗎？',function(){card2.style.display='none';var ci=Number(card2.dataset.ci);var wasSel=false;try{var sArr0=JSON.parse(localStorage.getItem('weekly-bulletin-select-v1')||'[]');wasSel=sArr0.indexOf(ci)>=0;}catch(_){}var bd=card2.querySelector('.badge');if(state.deletedCards.indexOf(ci)<0)state.deletedCards.push(ci);state.deletedMeta.cards[ci]={title:cardTitleOf(card2),badge:bd?bd.textContent:'',edited:!!state.editedCards[ci],selected:wasSel};try{var sArr=JSON.parse(localStorage.getItem('weekly-bulletin-select-v1')||'[]');var sIx=sArr.indexOf(ci);if(sIx>=0){sArr.splice(sIx,1);localStorage.setItem('weekly-bulletin-select-v1',JSON.stringify(sArr));}}catch(_){}persist();showUndo(cardTitleOf(card2),'card',String(ci));updateDeletedBtn();});
   }
 };
 function openSmallEdit(card,row){
@@ -722,6 +754,7 @@ cards.forEach(function(card){
   var h=card.querySelector('h2');if(h)bindLP(h,function(){openBigEdit(card);},card);
 });
 document.querySelectorAll('.card').forEach(function(c){c.addEventListener('contextmenu',function(e){e.preventDefault();});});
+try{var rescued=sessionStorage.getItem('bulletin-rescued');if(rescued){sessionStorage.removeItem('bulletin-rescued');var rp=rescued.indexOf('|');var rkind=rescued.slice(0,rp);var rid=rescued.slice(rp+1);if(rkind==='row'){var kp=rid.split(':');var rc=cards[Number(kp[0])];if(rc){var rr=rc.querySelectorAll('.row')[Number(kp[1])];if(rr){rr.scrollIntoView({block:'center'});rr.classList.add('rescued-flash');setTimeout(function(){rr.classList.remove('rescued-flash');},3000);}}}else if(rkind==='card'){var cc=cards[Number(rid)];if(cc){cc.scrollIntoView({block:'center'});cc.classList.add('rescued-flash');setTimeout(function(){cc.classList.remove('rescued-flash');},3000);}}}}catch(_){}
 })();
 </script>
 
@@ -745,6 +778,7 @@ function updateCount(){
   if(!shareBtn)return;
   shareBtn.textContent = sel.length>0 ? '分享已選（'+sel.length+'）' : '分享已選';
   shareBtn.disabled = sel.length===0;
+  var bb=document.getElementById('shareSelBatches');if(bb)bb.disabled = sel.length===0;
 }
 function setSel(card,on,animate){
   var ci=Number(card.dataset.ci);
@@ -783,19 +817,47 @@ async function ensureCanvas(){
   try{await new Promise(function(res,rej){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}catch(_){}
   return !!window.html2canvas;
 }
-if(shareBtn)shareBtn.onclick=async function(){
-  if(sel.length===0){alert('請先勾選至少一張大卡');return;}
-  var chosen=cards.filter(function(c){return sel.indexOf(Number(c.dataset.ci))>=0 && editDel.indexOf(Number(c.dataset.ci))<0;});
-  if(chosen.length===0){alert('已選的大卡已被刪除，請重新勾選');return;}
-  if(!(await ensureCanvas())){alert('圖片產生器載入失敗，請檢查網路後重試，或先用個別單卡分享');return;}
+var batchFiles=null,batchGroups=null,batchIndex=0;
+function openBatchFallback(title,text,showBatches){document.getElementById('batchFallbackTitle').textContent=title;document.getElementById('batchFallbackText').textContent=text;var bb=document.getElementById('batchFallbackBatches');if(bb)bb.style.display=showBatches?'':'none';document.getElementById('batchFallbackModal').classList.add('open');}
+function closeBatchFallback(){document.getElementById('batchFallbackModal').classList.remove('open');}
+document.getElementById('batchFallbackClose').onclick=closeBatchFallback;
+document.getElementById('batchFallbackDownload').onclick=function(){
+  if(!batchFiles||batchFiles.length===0){closeBatchFallback();return;}
+  batchFiles.forEach(function(f,i){var url=URL.createObjectURL(f);var a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();a.remove();if(i===0)window.open(url,'_blank');});
+  closeBatchFallback();alert('已逐張下載圖片，請在下載資料夾一次選多張傳到 LINE；若瀏覽器擋住多個下載，請改用分批分享。');
+};
+document.getElementById('batchFallbackBatches').onclick=async function(){closeBatchFallback();await shareNextBatch();};
+async function shareNextBatch(){
+  if(!batchGroups||batchIndex>=batchGroups.length){alert('全部批次已分享');return;}
+  var group=batchGroups[batchIndex];
+  try{
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:group}))){await navigator.share({files:group,title:'每週會議快訊'});}
+    else{throw new Error('系統分享不支援');}
+    batchIndex++;
+    if(batchIndex<batchGroups.length){openBatchFallback('分批分享','第'+batchIndex+'批已分享，尚餘 '+(batchFiles.length-batchIndex*5)+' 張，點「分批分享」繼續下一批。',true);}
+    else{alert('全部批次已分享');}
+  }catch(e){
+    if(e && e.name==='AbortError'){openBatchFallback('分批分享已取消','已取消，尚餘 '+(batchFiles.length-batchIndex*5)+' 張，點「分批分享」可繼續。',true);}
+    else{openBatchFallback('分批分享失敗','第'+(batchIndex+1)+'批分享失敗：'+(e&&e.message?e.message:e)+'，請改用逐張下載或重試。',true);}
+  }
+}
+async function generateSelectedFiles(){
+  var editDelFresh=[];
+  try{var es2=JSON.parse(localStorage.getItem('weekly-bulletin-edit-v1')||'{}');editDelFresh=es2.deletedCards||[];}catch(_){}
+  var beforeSel=sel.length;
+  sel=sel.filter(function(ci){return editDelFresh.indexOf(ci)<0;});
+  if(sel.length!==beforeSel){saveSel();updateCount();}
+  if(sel.length===0){alert('請先勾選至少一張大卡');return null;}
+  var chosen=cards.filter(function(c){return sel.indexOf(Number(c.dataset.ci))>=0;});
+  if(chosen.length===0){alert('已選的大卡已被刪除，請重新勾選');return null;}
+  if(!(await ensureCanvas())){alert('圖片產生器載入失敗，請檢查網路後重試，或先用個別單卡分享');return null;}
   var cbody=document.getElementById('cBody');
   var wasCollapsed=cbody && cbody.classList.contains('collapsed');
   var cToggle=document.getElementById('cToggle');
   var cToggleText=cToggle?cToggle.textContent:'';
-  var saved=[];
+  var saved=[];var files=[];
   try{
     if(cbody && wasCollapsed){cbody.classList.remove('collapsed');if(cToggle)cToggle.textContent='收合';}
-    var canvases=[];
     for(var i=0;i<chosen.length;i++){
       var card=chosen[i];
       var acts=card.querySelector('.actions');
@@ -804,38 +866,45 @@ if(shareBtn)shareBtn.onclick=async function(){
       card.style.display='';
       if(acts)acts.style.display='none';
       if(circ)circ.style.display='none';
+      // 批次多圖：逐張以與單卡完全相同的 scale:2 擷取，不合併、不縮放、不壓高、不改寬度
       var cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
-      canvases.push(cv);
+      var blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
+      if(!blob)throw new Error('無法產生圖片檔案');
+      var num=('0'+(i+1)).slice(-2);
+      files.push(new File([blob],'meeting-card-'+num+'.png',{type:'image/png'}));
     }
-    var gap=24, w=0, h=0;
-    canvases.forEach(function(cv){if(cv.width>w)w=cv.width;h+=cv.height;});
-    h+=gap*(canvases.length-1);
-    var out=document.createElement('canvas');out.width=w;out.height=h;
-    var ctx=out.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
-    var y=0;
-    canvases.forEach(function(cv){ctx.drawImage(cv,0,y);y+=cv.height+gap;});
-    var blob=await new Promise(function(res){out.toBlob(res,'image/png');});
-    if(!blob)throw new Error('無法產生圖片檔案');
-    var file=new File([blob],'meeting-cards.png',{type:'image/png'});
-    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
-      try{await navigator.share({files:[file],title:'每週會議快訊'});return;}
-      catch(se){if(se && se.name==='AbortError')return;}
-    }
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=url;a.download='meeting-cards.png';document.body.appendChild(a);a.click();a.remove();
-    window.open(url,'_blank');
-    alert('系統分享不支援，已開啟圖片分頁，請用系統分享鍵傳到 LINE，或在下載資料夾找 meeting-cards.png');
-  }catch(e){
-    alert('批次分享失敗：'+(e&&e.message?e.message:e));
+    return files;
   }finally{
     saved.forEach(function(sv){
       sv.card.style.display=sv.disp;
-      var acts=sv.card.querySelector('.actions');if(acts)acts.style.display=sv.acts;
-      var circ=sv.card.querySelector('.selcircle');if(circ)circ.style.display=sv.circ;
+      var acts2=sv.card.querySelector('.actions');if(acts2)acts2.style.display=sv.acts;
+      var circ2=sv.card.querySelector('.selcircle');if(circ2)circ2.style.display=sv.circ;
     });
     if(cbody && wasCollapsed){cbody.classList.add('collapsed');if(cToggle)cToggle.textContent=cToggleText;}
   }
-};
+}
+async function shareSelectedMulti(forceBatches){
+  var files;
+  try{files=await generateSelectedFiles();}catch(e){alert('批次分享失敗：'+(e&&e.message?e.message:e));return;}
+  if(!files)return;
+  batchFiles=files;
+  if(forceBatches){
+    batchGroups=[];for(var i=0;i<files.length;i+=5)batchGroups.push(files.slice(i,i+5));batchIndex=0;await shareNextBatch();return;
+  }
+  try{
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:files}))){
+      await navigator.share({files:files,title:'每週會議快訊'});return;
+    }
+    throw new Error('系統不支援一次分享多張圖片');
+  }catch(e){
+    if(e && e.name==='AbortError')return;
+    batchGroups=[];for(var j=0;j<files.length;j+=5)batchGroups.push(files.slice(j,j+5));batchIndex=0;
+    openBatchFallback('一次分享多張圖片不支援','系統或 LINE 不支援一次分享 '+files.length+' 張圖片，已準備分批分享（每批 5 張）或逐張下載，請勿以為全部都已分享出去。',true);
+  }
+}
+if(shareBtn)shareBtn.onclick=async function(){await shareSelectedMulti(false);};
+var shareBatchesBtn=document.getElementById('shareSelBatches');
+if(shareBatchesBtn)shareBatchesBtn.onclick=async function(){await shareSelectedMulti(true);};
 })();
 </script>
 </body></html>
