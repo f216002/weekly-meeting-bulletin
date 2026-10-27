@@ -1,19 +1,21 @@
 <!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>每週會議快訊</title>
 <style>
-body{margin:0;background:#fff;color:#111;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.7}
+body{margin:0;background:#fff;color:#111;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:var(--base,16px);line-height:1.7}
 .wrap{max-width:760px;margin:0 auto;padding:12px 14px 40px}
-h1{font-size:26px;margin:8px 0 12px;color:#111}
+h1{font-size:calc(var(--base,16px)*2.625);margin:8px 0 12px;color:#111}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .filters button{background:#fff;color:#111;border:2px solid #333;border-radius:20px;padding:6px 14px;font-size:16px;cursor:pointer}
 .filters button.on{background:#111;color:#fff}
 .fonts button{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:4px 10px;font-size:15px;cursor:pointer}
-.sec{margin:22px 0 6px;font-size:20px;font-weight:700}
-.card{background:#fff;border:3px solid #333;border-radius:12px;padding:12px 14px;margin:12px 0}
+.sec{margin:22px 0 6px;font-size:calc(var(--base,16px)*2.375);font-weight:700}
+.card{background:#fff;border:3px solid #333;border-radius:12px;padding:12px 14px;margin:12px 0;font-size:calc(var(--base,16px)*2);line-height:1.7}
 .card.a{border-color:#D32F2F}.card.b{border-color:#E65100}.card.c{border-color:#1565C0}
 .badge{display:inline-block;padding:2px 10px;border-radius:14px;color:#fff;font-weight:700;font-size:15px}
 .badge.a{background:#D32F2F}.badge.b{background:#E65100}.badge.c{background:#1565C0}
-.card h2{font-size:20px;margin:8px 0 6px;color:#111}
+.card .badge{font-size:20px}
+.card h2{font-size:calc(var(--base,16px)*2.25);margin:8px 0 6px;color:#111}
+.card .src{font-size:18px}
 .row{margin:10px 0}.k{font-weight:700;color:#111}.v{color:#111}
 .line{margin:3px 0}
 .src{color:#555;font-size:14px;margin-top:10px}
@@ -67,7 +69,7 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 </style></head><body><div class="wrap">
 <h1>2026年10月28日</h1>
 <p class="hint">長按任一小卡可編輯／刪除</p>
-<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelBatches" type="button" disabled>分批分享</button></div><p id="batchNote">批次分享是一次傳多張圖，每張圖和單卡分享時一模一樣，未合併、未縮小；若 LINE 只收到第一張，請改用分批分享。</p>
+<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelDownload" type="button" disabled>下載全部圖片</button><button id="shareSelBatches" type="button" disabled>一次傳多張（非 LINE）</button></div><p id="batchNote">分享已選是逐張分享到 LINE：按一次分享一張，傳完按下一張；LINE 一次傳多張時只會收到最後一張，所以不要用一次多張傳到 LINE。也可以先按「下載全部圖片」，再到 LINE 自己的選照片一次選多張傳出。</p>
 <div class="filters" id="filters">
 <button data-f="all" class="on">全部</button><button data-f="A">A 馬上執行</button><button data-f="B">B 近期班期</button><button data-f="C">C 公告參考</button>
 <span class="fonts" style="margin-left:auto"><button id="fsDown">A-</button><button id="fsUp">A+</button></span>
@@ -597,8 +599,8 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 let fs=16;
-document.getElementById('fsUp').onclick=()=>{fs=Math.min(22,fs+1);document.body.style.fontSize=fs+'px'};
-document.getElementById('fsDown').onclick=()=>{fs=Math.max(14,fs-1);document.body.style.fontSize=fs+'px'};
+document.getElementById('fsUp').onclick=()=>{fs=Math.min(22,fs+1);document.documentElement.style.setProperty('--base',fs+'px')};
+document.getElementById('fsDown').onclick=()=>{fs=Math.max(14,fs-1);document.documentElement.style.setProperty('--base',fs+'px')};
 document.querySelectorAll('#filters button[data-f]').forEach(b=>{b.onclick=()=>{document.querySelectorAll('#filters button[data-f]').forEach(x=>x.classList.remove('on'));b.classList.add('on');const f=b.dataset.f;document.querySelectorAll('.card').forEach(c=>{c.style.display=(f==='all'||c.dataset.cat===f)?'':'none'});}});
 const cb=document.getElementById('cBody'),ct=document.getElementById('cToggle');
 if(ct){ct.onclick=()=>{const h=cb.classList.toggle('collapsed');ct.textContent=h?'展開':'收合'};}
@@ -632,7 +634,7 @@ finally{acts.style.display='';var selBack=card.querySelector('.selcircle');if(se
 <div id="editModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 id="editTitle" style="margin-top:0"></h3><div id="editFields"></div><div class="iconrow"><button class="iconbtn ok" id="editSave" aria-label="儲存" title="儲存">✓</button><button class="iconbtn" id="editCancel" aria-label="取消" title="取消">↩</button><button class="iconbtn danger" id="editDelete" aria-label="刪除" title="刪除">✖️</button></div></div></div>
 <div id="delModal" role="dialog" aria-modal="true"><div class="edit-box"><p id="delText">確定要刪除這一項嗎？</p><div class="iconrow"><button class="iconbtn danger" id="delConfirm" aria-label="確認刪除" title="確認刪除">✓</button><button class="iconbtn" id="delCancel" aria-label="取消" title="取消">↩</button></div></div></div>
 <div id="deletedModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0">已刪除的項目</h3><div id="deletedList" class="deleted-list"></div><div class="iconrow"><button class="modalbtn" id="deletedClose" type="button">關閉</button></div></div></div>
-<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackBatches" type="button">分批分享（每批5張）</button><button class="modalbtn" id="batchFallbackDownload" type="button">逐張下載</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
+<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackSeq" type="button">分享下一張（逐張到 LINE）</button><button class="modalbtn" id="batchFallbackDownload" type="button">下載全部圖片</button><button class="modalbtn" id="batchFallbackMulti" type="button">一次傳多張（非 LINE）</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
 <div id="undoBar" role="status"><span id="undoText"></span><span style="flex:1"></span><button id="undoRestore" type="button">復原</button><button id="undoClose" type="button">✕</button></div>
 <script>
 (function(){
@@ -779,6 +781,7 @@ function updateCount(){
   shareBtn.textContent = sel.length>0 ? '分享已選（'+sel.length+'）' : '分享已選';
   shareBtn.disabled = sel.length===0;
   var bb=document.getElementById('shareSelBatches');if(bb)bb.disabled = sel.length===0;
+  var dl=document.getElementById('shareSelDownload');if(dl)dl.disabled = sel.length===0;
 }
 function setSel(card,on,animate){
   var ci=Number(card.dataset.ci);
@@ -817,79 +820,45 @@ async function ensureCanvas(){
   try{await new Promise(function(res,rej){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}catch(_){}
   return !!window.html2canvas;
 }
-var batchFiles=null,batchGroups=null,batchIndex=0;
-function openBatchFallback(title,text,showBatches){document.getElementById('batchFallbackTitle').textContent=title;document.getElementById('batchFallbackText').textContent=text;var bb=document.getElementById('batchFallbackBatches');if(bb)bb.style.display=showBatches?'':'none';document.getElementById('batchFallbackModal').classList.add('open');}
+var batchFiles=null,seqFiles=null,seqIndex=0;
+function openBatchFallback(title,text,showSeq,showDownload,showMulti){document.getElementById('batchFallbackTitle').textContent=title;document.getElementById('batchFallbackText').textContent=text;document.getElementById('batchFallbackSeq').style.display=showSeq?'':'none';document.getElementById('batchFallbackDownload').style.display=showDownload?'':'none';document.getElementById('batchFallbackMulti').style.display=showMulti?'':'none';document.getElementById('batchFallbackModal').classList.add('open');}
 function closeBatchFallback(){document.getElementById('batchFallbackModal').classList.remove('open');}
 document.getElementById('batchFallbackClose').onclick=closeBatchFallback;
-document.getElementById('batchFallbackDownload').onclick=function(){
-  if(!batchFiles||batchFiles.length===0){closeBatchFallback();return;}
-  batchFiles.forEach(function(f,i){var url=URL.createObjectURL(f);var a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();a.remove();if(i===0)window.open(url,'_blank');});
-  closeBatchFallback();alert('已逐張下載圖片，請在下載資料夾一次選多張傳到 LINE；若瀏覽器擋住多個下載，請改用分批分享。');
-};
-document.getElementById('batchFallbackBatches').onclick=async function(){closeBatchFallback();await shareNextBatch();};
-async function shareNextBatch(){
-  if(!batchGroups||batchIndex>=batchGroups.length){alert('全部批次已分享');return;}
-  var group=batchGroups[batchIndex];
+function downloadAllFiles(files){
+  if(!files||files.length===0){alert('沒有可下載的圖片');return;}
+  files.forEach(function(f,i){var url=URL.createObjectURL(f);var a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();a.remove();if(i===0)window.open(url,'_blank');});
+  alert('已下載全部 '+files.length+' 張圖片，請到 LINE 群組用選照片一次選多張傳出；若瀏覽器擋住多個下載，請改用逐張分享到 LINE。');
+}
+document.getElementById('batchFallbackDownload').onclick=function(){var f=batchFiles||seqFiles;closeBatchFallback();downloadAllFiles(f);};
+document.getElementById('batchFallbackSeq').onclick=async function(){closeBatchFallback();await shareNextSequential();};
+document.getElementById('batchFallbackMulti').onclick=async function(){closeBatchFallback();await shareSelectedMultiFile();};
+async function shareNextSequential(){
+  if(!seqFiles||seqIndex>=seqFiles.length){alert('全部已分享');return;}
+  var file=seqFiles[seqIndex];
   try{
-    if(navigator.share && (!navigator.canShare || navigator.canShare({files:group}))){await navigator.share({files:group,title:'每週會議快訊'});}
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:'每週會議快訊'});}
     else{throw new Error('系統分享不支援');}
-    batchIndex++;
-    if(batchIndex<batchGroups.length){openBatchFallback('分批分享','第'+batchIndex+'批已分享，尚餘 '+(batchFiles.length-batchIndex*5)+' 張，點「分批分享」繼續下一批。',true);}
-    else{alert('全部批次已分享');}
+    seqIndex++;
+    if(seqIndex<seqFiles.length){openBatchFallback('逐張分享','第 '+seqIndex+'/'+seqFiles.length+' 張已分享，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」繼續傳到 LINE。',true,true,false);}
+    else{alert('全部 '+seqFiles.length+' 張已逐張分享完畢');}
   }catch(e){
-    if(e && e.name==='AbortError'){openBatchFallback('分批分享已取消','已取消，尚餘 '+(batchFiles.length-batchIndex*5)+' 張，點「分批分享」可繼續。',true);}
-    else{openBatchFallback('分批分享失敗','第'+(batchIndex+1)+'批分享失敗：'+(e&&e.message?e.message:e)+'，請改用逐張下載或重試。',true);}
+    if(e && e.name==='AbortError'){openBatchFallback('逐張分享已取消','已分享 '+seqIndex+' 張，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」可繼續；已取消的不算已分享。',true,true,false);}
+    else{openBatchFallback('逐張分享失敗','第 '+(seqIndex+1)+' 張分享失敗：'+(e&&e.message?e.message:e)+'，已分享 '+seqIndex+' 張，尚餘 '+(seqFiles.length-seqIndex)+' 張，可重試下一張或改用下載全部圖片。',true,true,false);}
   }
 }
-async function generateSelectedFiles(){
-  var editDelFresh=[];
-  try{var es2=JSON.parse(localStorage.getItem('weekly-bulletin-edit-v1')||'{}');editDelFresh=es2.deletedCards||[];}catch(_){}
-  var beforeSel=sel.length;
-  sel=sel.filter(function(ci){return editDelFresh.indexOf(ci)<0;});
-  if(sel.length!==beforeSel){saveSel();updateCount();}
-  if(sel.length===0){alert('請先勾選至少一張大卡');return null;}
-  var chosen=cards.filter(function(c){return sel.indexOf(Number(c.dataset.ci))>=0;});
-  if(chosen.length===0){alert('已選的大卡已被刪除，請重新勾選');return null;}
-  if(!(await ensureCanvas())){alert('圖片產生器載入失敗，請檢查網路後重試，或先用個別單卡分享');return null;}
-  var cbody=document.getElementById('cBody');
-  var wasCollapsed=cbody && cbody.classList.contains('collapsed');
-  var cToggle=document.getElementById('cToggle');
-  var cToggleText=cToggle?cToggle.textContent:'';
-  var saved=[];var files=[];
-  try{
-    if(cbody && wasCollapsed){cbody.classList.remove('collapsed');if(cToggle)cToggle.textContent='收合';}
-    for(var i=0;i<chosen.length;i++){
-      var card=chosen[i];
-      var acts=card.querySelector('.actions');
-      var circ=card.querySelector('.selcircle');
-      saved.push({card:card,disp:card.style.display,acts:acts?acts.style.display:'',circ:circ?circ.style.display:''});
-      card.style.display='';
-      if(acts)acts.style.display='none';
-      if(circ)circ.style.display='none';
-      // 批次多圖：逐張以與單卡完全相同的 scale:2 擷取，不合併、不縮放、不壓高、不改寬度
-      var cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
-      var blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
-      if(!blob)throw new Error('無法產生圖片檔案');
-      var num=('0'+(i+1)).slice(-2);
-      files.push(new File([blob],'meeting-card-'+num+'.png',{type:'image/png'}));
-    }
-    return files;
-  }finally{
-    saved.forEach(function(sv){
-      sv.card.style.display=sv.disp;
-      var acts2=sv.card.querySelector('.actions');if(acts2)acts2.style.display=sv.acts;
-      var circ2=sv.card.querySelector('.selcircle');if(circ2)circ2.style.display=sv.circ;
-    });
-    if(cbody && wasCollapsed){cbody.classList.add('collapsed');if(cToggle)cToggle.textContent=cToggleText;}
-  }
-}
-async function shareSelectedMulti(forceBatches){
+async function shareSelectedSequential(){
   var files;
   try{files=await generateSelectedFiles();}catch(e){alert('批次分享失敗：'+(e&&e.message?e.message:e));return;}
   if(!files)return;
-  batchFiles=files;
-  if(forceBatches){
-    batchGroups=[];for(var i=0;i<files.length;i+=5)batchGroups.push(files.slice(i,i+5));batchIndex=0;await shareNextBatch();return;
+  batchFiles=files;seqFiles=files;seqIndex=0;
+  openBatchFallback('逐張分享到 LINE','已選 '+files.length+' 張，將逐張分享到 LINE：按一次分享一張，傳完按下一張。LINE 一次傳多張只會收到最後一張，所以這裡不一次傳多張。',true,true,false);
+}
+async function shareSelectedMultiFile(){
+  var files=batchFiles;
+  if(!files){
+    try{files=await generateSelectedFiles();}catch(e){alert('批次分享失敗：'+(e&&e.message?e.message:e));return;}
+    if(!files)return;
+    batchFiles=files;
   }
   try{
     if(navigator.share && (!navigator.canShare || navigator.canShare({files:files}))){
@@ -898,13 +867,14 @@ async function shareSelectedMulti(forceBatches){
     throw new Error('系統不支援一次分享多張圖片');
   }catch(e){
     if(e && e.name==='AbortError')return;
-    batchGroups=[];for(var j=0;j<files.length;j+=5)batchGroups.push(files.slice(j,j+5));batchIndex=0;
-    openBatchFallback('一次分享多張圖片不支援','系統或 LINE 不支援一次分享 '+files.length+' 張圖片，已準備分批分享（每批 5 張）或逐張下載，請勿以為全部都已分享出去。',true);
+    openBatchFallback('一次傳多張不適用於 LINE','一次傳 '+files.length+' 張圖片不適用於 LINE：實機測試證明 LINE 只會收到最後一張，前面幾張不會到。請改用逐張分享到 LINE，或下載全部圖片後到 LINE 自己的選照片一次選多張傳出。',true,true,false);
   }
 }
-if(shareBtn)shareBtn.onclick=async function(){await shareSelectedMulti(false);};
+if(shareBtn)shareBtn.onclick=async function(){await shareSelectedSequential();};
 var shareBatchesBtn=document.getElementById('shareSelBatches');
-if(shareBatchesBtn)shareBatchesBtn.onclick=async function(){await shareSelectedMulti(true);};
+if(shareBatchesBtn)shareBatchesBtn.onclick=async function(){await shareSelectedMultiFile();};
+var shareDownloadBtn=document.getElementById('shareSelDownload');
+if(shareDownloadBtn)shareDownloadBtn.onclick=async function(){var files;try{files=await generateSelectedFiles();}catch(e){alert('下載失敗：'+(e&&e.message?e.message:e));return;}if(!files)return;batchFiles=files;downloadAllFiles(files);};
 })();
 </script>
 </body></html>
