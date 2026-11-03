@@ -67,6 +67,8 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 .modalbtn{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:8px 14px;font-size:15px;cursor:pointer}
 .rescued-flash{outline:3px solid #FF9800!important;background:#FFF9C4!important}
 #batchNote{color:#555;font-size:14px;margin:2px 0 10px}
+#backToTop{display:none;position:fixed;top:56px;right:8px;z-index:150;background:#fff;color:#111;border:2px solid #333;border-radius:20px;padding:6px 10px;font-size:14px;line-height:1.4;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+@media (max-width:768px){body.weekly-approved #backToTop.show{display:block}}
 </style><style id="weeklyGateCss">body:not(.weekly-approved) .wrap{display:none!important}.wrap{padding-top:54px}#weeklyUtil{gap:4px!important;right:8px!important}#weeklyUtil button{padding:6px 10px!important;font-size:14px!important}#weeklyAdminPanel table{width:100%;border-collapse:collapse;min-width:640px}#weeklyAdminPanel th,#weeklyAdminPanel td{border-bottom:1px solid #ddd;padding:8px 6px;text-align:left;vertical-align:top;font-size:14px}#weeklyAdminPanel .cell-main{font-weight:700}#weeklyAdminPanel .cell-sub{font-size:13px;color:#666;word-break:break-all}#weeklyAdminPanel .mono{font-family:monospace;font-size:12px;word-break:break-all}#weeklyAdminPanel .status-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:13px;white-space:nowrap}#weeklyAdminPanel .status-badge.pending{background:#f3e3ac}#weeklyAdminPanel .status-badge.approved{background:#d9ead3}#weeklyAdminPanel .status-badge.rejected{background:#f4cccc}#weeklyAdminPanel .status-badge.suspended{background:#d9d9d9}#weeklyAdminPanel td.actions{white-space:nowrap}#weeklyAdminPanel td.actions button{cursor:pointer;border-radius:8px;border:2px solid #333;background:#fff;padding:4px 12px;font:inherit;font-size:14px;margin:2px}#weeklyAdminPanel td.actions button.danger{color:#D32F2F;border-color:#e0a8a8}#weeklyAdminPanel td.actions button.warn{background:#f3e3ac}#weeklyAdminPanel td.actions button.ghost{background:transparent}#weeklyAdminPanel .tabbtn.active{background:#111!important;color:#fff!important}</style></head><body><div id="weeklyGate" style="max-width:560px;margin:8vh auto;padding:28px;background:#fff;border:2px solid #333;border-radius:16px;line-height:1.8;color:#111">
 <h2 style="margin-top:0">每週會議快訊</h2>
 <p id="weeklyGateMsg">本週會快訊不公開，僅供核准成員閱讀。請先用 Google 帳號登入。</p>
@@ -123,6 +125,7 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 <div id="weeklyAdminToast" style="display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:960;max-width:90vw;text-align:center"></div>
 </div>
 </div>
+<button id="backToTop" type="button" aria-label="回到頁首">↑ Top</button>
 <div class="wrap">
 <h1>2026年11月03日</h1>
 <p class="hint">長按任一小卡可編輯／刪除</p>
@@ -1034,4 +1037,6 @@ if(shareDownloadBtn)shareDownloadBtn.onclick=async function(){var files;try{file
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="weekly-gate.js"></script>
+<script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=document.body.classList.contains('weekly-approved')&&y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
 </body></html>
+
