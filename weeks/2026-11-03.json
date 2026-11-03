@@ -880,9 +880,29 @@
           ]
         },
         {
-          "title": "線上方式",
+          "title": "線上會議",
           "lines": [
-            "線上會議方式請依道務中心公告；線上會議帳號密碼及群組連結不在本頁公開。"
+            "加入Zoom會議",
+            "https://us02web.zoom.us/j/87829052330?pwd=OIx82KMC7dTiGUAk4o5wHugQMa7EpI.1"
+          ]
+        },
+        {
+          "title": "會議號碼",
+          "lines": [
+            "878 2905 2330"
+          ]
+        },
+        {
+          "title": "密碼",
+          "lines": [
+            "123456"
+          ]
+        },
+        {
+          "title": "LINE群組",
+          "lines": [
+            "請班員加入此LINE群",
+            "https://line.me/ti/g/MBSBSHVMmm"
           ]
         }
       ]
