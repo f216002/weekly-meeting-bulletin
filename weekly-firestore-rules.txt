@@ -1,0 +1,64 @@
+/* 每週會議快訊 Firestore 規則片段（2026-11-03，登入審核門檻用）
+   ⚠️ 這是「片段」，不是整份規則：請把下面兩個 match 區塊合併進
+   Firebase 專案 my-chinese-sentence-bank-v3 現有的規則檔裡，
+   絕對不要用這份檔案整份覆蓋現有規則，否則 V4／三寶等其他集合的規則會被洗掉。
+   新集合（全新名單，與 V4、三寶完全隔離）：
+     weekly_accessRequests/{uid}  申請單
+     weekly_approvedUsers/{uid}   核准名單
+   管理員：f216002@gmail.com（免審核，兩集合完整存取）
+   一般使用者：只能建立／更新自己的申請單（結果狀態必須是 pending），
+   只能讀自己的申請單與自己的核准狀態；核准名單的建立／修改／刪除只限管理員。
+   週會卡片內容目前仍在 index.html 靜態檔裡，不在 Firestore，
+   所以這裡不需要、也沒有給一般使用者讀卡片資料的規則；
+   若日後把卡片資料移進 Firestore，再另加規則。
+
+   貼入現有規則檔的 rules_version = '2'; 區塊內，放在其他 match 之前或之後皆可，
+   但不要放在 match /{document=**} 之後（之後的 match 不會被比對到）。
+*/
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function weeklyIsManager() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() == 'f216002@gmail.com';
+    }
+    function weeklyIsOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // 申請單：本人可建立／更新自己的申請（結果必須是待審核），本人可讀自己的申請
+    match /weekly_accessRequests/{uid} {
+      allow get: if weeklyIsManager() || weeklyIsOwner(uid);
+      allow list: if weeklyIsManager();
+      allow create: if weeklyIsOwner(uid)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.name is string
+        && request.resource.data.unit is string
+        && request.resource.data.district is string;
+      allow update: if weeklyIsManager()
+        || (weeklyIsOwner(uid) && request.resource.data.status == 'pending');
+      allow delete: if weeklyIsManager();
+    }
+
+    // 核准名單：本人只能讀自己的核准狀態；建立／修改／刪除只限管理員
+    match /weekly_approvedUsers/{uid} {
+      allow get: if weeklyIsManager() || weeklyIsOwner(uid);
+      allow list: if weeklyIsManager();
+      allow create, update, delete: if weeklyIsManager();
+    }
+  }
+}
+
+/* Cheng 必須在 Firebase Console 親自做的事（助理不代為發布規則）：
+   1. Firebase Console → 專案 my-chinese-sentence-bank-v3 → Firestore Database → 規則，
+      把上面兩個 match 區塊合併進現有規則，按「發布」。
+   2. 同專案 → Authentication → Sign-in method，確認 Google 登入已啟用。
+   3. 同專案 → Authentication → Settings → Authorized domains，
+      確認 f216002.github.io 已在授權網域清單（V4／三寶同專案同網域，理論上已在，
+      若未在，請手動加入，否則登入會報 auth/unauthorized-domain）。
+   在規則發布前：管理員登入可直接看內容（管理員免審核是程式內判斷），
+   但新人申請會因 permission-denied 送不出去，頁面會提示「請先發布每週快訊規則」。
+*/
