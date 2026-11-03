@@ -30,3 +30,8 @@
 - `RULES.md`：拆卡、分類、完整、去敏感化、最新檔判斷、發布閘門的完整規則。
 - `config.json`：Drive 資料夾 ID 與結構說明（只有 ID，沒有憑證）。
 - `.github/workflows/generate-draft.yml`：推送到 `input/` 時產生草稿並跑自測，不自動發布到首頁。
+
+## 登入審核門檻（2026-11-03 新增）
+- 本站現有 Google 登入＋管理員審核門檻（weekly-gate.js，比照三寶門檻行為，集合全新獨立）。未登入看不到週會卡片；管理員 f216002@gmail.com 免審核；其餘人填寫姓名／單位／區別申請，管理員在站內「後台審核」核准或拒絕。
+- 新集合：weekly_accessRequests（申請）、weekly_approvedUsers（核准）。不沿用 V4 或三寶的核准名單，所有人除管理員外都要重新申請。
+- Firestore 規則見 weekly-firestore-rules.txt（片段，須合併進專案現有規則後由 Cheng 在 Firebase Console 發布，助理不代為發布規則）。門檻是 JavaScript 隱藏，公開 repo 仍看得到檔案，因此本步驟不放敏感完整版，門檻後內容仍是去敏感化版。
