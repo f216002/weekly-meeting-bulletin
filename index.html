@@ -1,3 +1,4 @@
+sha: 4315c4b5b6c12553b1aae682f3cb90695acb8c67
 <!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>每週會議快訊</title>
 <meta name="robots" content="noindex, nofollow">
@@ -68,13 +69,11 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 .deleted-item button{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer;flex:0 0 auto}
 .modalbtn{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:8px 14px;font-size:15px;cursor:pointer}
 .rescued-flash{outline:3px solid #FF9800!important;background:#FFF9C4!important}
-#batchNote{color:#555;font-size:14px;margin:2px 0 10px}
 #backToTop{display:none;position:fixed;top:56px;right:8px;z-index:150;background:#fff;color:#111;border:2px solid #333;border-radius:20px;padding:6px 10px;font-size:14px;line-height:1.4;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.15)}
 @media (max-width:768px){#backToTop.show{display:block}}
 </style><style id="weeklyAdminCss">/* 公開檢視：內文一律顯示，不需登入核准 */.wrap{padding-top:54px}#weeklyUtil{gap:4px!important;right:8px!important}#weeklyUtil button{padding:6px 10px!important;font-size:14px!important}body:not(.weekly-admin) .actions{display:none!important}
 body:not(.weekly-admin) .selcircle{display:none!important}
 body:not(.weekly-admin) .batchbar{display:none!important}
-body:not(.weekly-admin) #batchNote{display:none!important}
 body:not(.weekly-admin) #restoreAll,body:not(.weekly-admin) #deletedBtn{display:none!important}
 body:not(.weekly-admin) #undoBar{display:none!important}
 body:not(.weekly-admin) #editModal,body:not(.weekly-admin) #delModal,body:not(.weekly-admin) #deletedModal{display:none!important}
@@ -96,12 +95,12 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="wrap">
 <h1>2026年11月03日</h1>
 <p class="hint">管理者登入後，長按任一小卡可編輯／刪除；未登入者只能檢視。</p>
-<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelDownload" type="button" disabled>下載全部圖片</button><button id="shareSelBatches" type="button" disabled>一次傳多頁（非 LINE）</button></div><p id="batchNote">分享已選是逐頁分享到 LINE：按一次分享一頁，傳完按下一頁；每個事件最多 3 頁，總張數是各事件頁數之和，內容不刪減。LINE 一次傳多頁時只會收到最後一頁，所以不要用一次多頁傳到 LINE。也可以先按「下載全部圖片」，再到 LINE 自己的選照片一次選多頁傳出。</p>
+<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button></div>
 <div class="filters" id="filters">
 <button data-f="all" class="on">全部</button><button data-f="A">A 馬上執行</button><button data-f="B">B 近期班期</button><button data-f="C">C 公告參考</button>
 <span class="fonts" style="margin-left:auto"><button id="fsDown">A-</button><button id="fsUp">A+</button></span>
 </div>
-<p class="foot">本頁為去敏感化版：線上會議帳號密碼、個人電話、聯絡信箱、清口與安堂個人名單、各區出席大表皆不在本頁公開。首頁永遠只顯示最新已發布的一週。本頁已設 noindex、robots.txt 拒絕收錄，僅知道連結的人可閱讀，但不是真正私密（見 RULES.md 第 12 節）；只有管理者登入後才有編輯與分享功能。</p>
+
 
 <div class="sec" id="shengxunSecTitle">聖訓 <button id="shengxunToggle" style="background:#fff;border:2px solid #8C6A00;border-radius:8px;padding:4px 10px;font-size:15px">收起</button></div><div class="cbody" id="shengxunBody">
 <article class="card shengxun" data-cat="S">
@@ -1023,7 +1022,7 @@ finally{acts.style.display='';var selBack=card.querySelector('.selcircle');if(se
 <div id="editModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 id="editTitle" style="margin-top:0"></h3><div id="editFields"></div><div class="iconrow"><button class="iconbtn ok" id="editSave" aria-label="儲存" title="儲存">✓</button><button class="iconbtn" id="editCancel" aria-label="取消" title="取消">↩</button><button class="iconbtn danger" id="editDelete" aria-label="刪除" title="刪除">✖️</button></div></div></div>
 <div id="delModal" role="dialog" aria-modal="true"><div class="edit-box"><p id="delText">確定要刪除這一項嗎？</p><div class="iconrow"><button class="iconbtn danger" id="delConfirm" aria-label="確認刪除" title="確認刪除">✓</button><button class="iconbtn" id="delCancel" aria-label="取消" title="取消">↩</button></div></div></div>
 <div id="deletedModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0">已刪除的項目</h3><div id="deletedList" class="deleted-list"></div><div class="iconrow"><button class="modalbtn" id="deletedClose" type="button">關閉</button></div></div></div>
-<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackSeq" type="button">分享下一頁（逐頁到 LINE）</button><button class="modalbtn" id="batchFallbackDownload" type="button">下載全部圖片</button><button class="modalbtn" id="batchFallbackMulti" type="button">一次傳多頁（非 LINE）</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
+<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackSeq" type="button">分享下一頁（逐頁到 LINE）</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
 <div id="undoBar" role="status"><span id="undoText"></span><span style="flex:1"></span><button id="undoRestore" type="button">復原</button><button id="undoClose" type="button">✕</button></div>
 <script>
 (function(){
@@ -1172,8 +1171,6 @@ function updateCount(){
   if(!shareBtn)return;
   shareBtn.textContent = sel.length>0 ? '分享已選（'+sel.length+'）' : '分享已選';
   shareBtn.disabled = sel.length===0;
-  var bb=document.getElementById('shareSelBatches');if(bb)bb.disabled = sel.length===0;
-  var dl=document.getElementById('shareSelDownload');if(dl)dl.disabled = sel.length===0;
 }
 function setSel(card,on,animate){
   var ci=Number(card.dataset.ci);
@@ -1213,17 +1210,10 @@ async function ensureCanvas(){
   return !!window.html2canvas;
 }
 var batchFiles=null,seqFiles=null,seqIndex=0;
-function openBatchFallback(title,text,showSeq,showDownload,showMulti){document.getElementById('batchFallbackTitle').textContent=title;document.getElementById('batchFallbackText').textContent=text;document.getElementById('batchFallbackSeq').style.display=showSeq?'':'none';document.getElementById('batchFallbackDownload').style.display=showDownload?'':'none';document.getElementById('batchFallbackMulti').style.display=showMulti?'':'none';document.getElementById('batchFallbackModal').classList.add('open');}
+function openBatchFallback(title,text,showSeq,showDownload,showMulti){document.getElementById('batchFallbackTitle').textContent=title;document.getElementById('batchFallbackText').textContent=text;var sq=document.getElementById('batchFallbackSeq');if(sq)sq.style.display=showSeq?'':'none';document.getElementById('batchFallbackModal').classList.add('open');}
 function closeBatchFallback(){document.getElementById('batchFallbackModal').classList.remove('open');}
 document.getElementById('batchFallbackClose').onclick=closeBatchFallback;
-function downloadAllFiles(files){
-  if(!files||files.length===0){alert('沒有可下載的圖片');return;}
-  files.forEach(function(f,i){var url=URL.createObjectURL(f);var a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();a.remove();if(i===0)window.open(url,'_blank');});
-  alert('已下載全部 '+files.length+' 頁圖片，請到 LINE 群組用選照片一次選多頁傳出；若瀏覽器擋住多個下載，請改用逐頁分享到 LINE。');
-}
-document.getElementById('batchFallbackDownload').onclick=function(){var f=batchFiles||seqFiles;closeBatchFallback();downloadAllFiles(f);};
 document.getElementById('batchFallbackSeq').onclick=async function(){closeBatchFallback();await shareNextSequential();};
-document.getElementById('batchFallbackMulti').onclick=async function(){closeBatchFallback();await shareSelectedMultiFile();};
 async function generateSelectedFiles(){
   if(!window.isWeeklyAdmin){alert('分享功能僅限管理者，請先用管理者帳號登入。');return null;}
   if(!sel||sel.length===0){alert('請先勾選要分享的大卡');return null;}
@@ -1295,7 +1285,7 @@ async function shareNextSequential(){
     else{alert('全部 '+seqFiles.length+' 頁已逐頁分享完畢');sel=[];try{localStorage.removeItem(SELKEY);}catch(_){}cards.forEach(function(c){var b=c.querySelector('.selcircle');if(b){b.classList.remove('on');b.setAttribute('aria-pressed','false');}});updateCount();seqFiles=null;seqIndex=0;}
   }catch(e){
     if(e && e.name==='AbortError'){openBatchFallback('逐頁分享已取消','已分享 '+seqIndex+' 頁，尚餘 '+(seqFiles.length-seqIndex)+' 頁，點「分享下一頁」可繼續；已取消的不算已分享。',true,true,false);}
-    else{openBatchFallback('逐頁分享失敗','第 '+(seqIndex+1)+' 頁分享失敗：'+(e&&e.message?e.message:e)+'，已分享 '+seqIndex+' 頁，尚餘 '+(seqFiles.length-seqIndex)+' 頁，可重試下一頁或改用下載全部圖片。',true,true,false);}
+    else{openBatchFallback('逐頁分享失敗','第 '+(seqIndex+1)+' 頁分享失敗：'+(e&&e.message?e.message:e)+'，已分享 '+seqIndex+' 頁，尚餘 '+(seqFiles.length-seqIndex)+' 頁，可重試下一頁。',true,true,false);}
   }
 }
 async function shareSelectedSequential(){
@@ -1305,28 +1295,7 @@ async function shareSelectedSequential(){
   batchFiles=files;seqFiles=files;seqIndex=0;
   openBatchFallback('逐頁分享到 LINE','已選 '+(window.lastGeneratedCardCount||files.length)+' 張大卡，共 '+files.length+' 頁，將逐頁分享到 LINE：按一次分享一頁，傳完按下一頁。長卡會自動切成多頁。LINE 一次傳多頁只會收到最後一頁，所以這裡不一次傳多頁。',true,true,false);
 }
-async function shareSelectedMultiFile(){
-  var files=batchFiles;
-  if(!files){
-    try{files=await generateSelectedFiles();}catch(e){alert('批次分享失敗：'+(e&&e.message?e.message:e));return;}
-    if(!files)return;
-    batchFiles=files;
-  }
-  try{
-    if(navigator.share && (!navigator.canShare || navigator.canShare({files:files}))){
-      await navigator.share({files:files});return;
-    }
-    throw new Error('系統不支援一次分享多張圖片');
-  }catch(e){
-    if(e && e.name==='AbortError')return;
-    openBatchFallback('一次傳多頁不適用於 LINE','一次傳 '+files.length+' 頁圖片不適用於 LINE：實機測試證明 LINE 只會收到最後一頁，前面幾頁不會到。請改用逐頁分享到 LINE，或下載全部圖片後到 LINE 自己的選照片一次選多頁傳出。',true,true,false);
-  }
-}
 if(shareBtn)shareBtn.onclick=async function(){await shareSelectedSequential();};
-var shareBatchesBtn=document.getElementById('shareSelBatches');
-if(shareBatchesBtn)shareBatchesBtn.onclick=async function(){await shareSelectedMultiFile();};
-var shareDownloadBtn=document.getElementById('shareSelDownload');
-if(shareDownloadBtn)shareDownloadBtn.onclick=async function(){var files;try{files=await generateSelectedFiles();}catch(e){alert('下載失敗：'+(e&&e.message?e.message:e));return;}if(!files)return;batchFiles=files;downloadAllFiles(files);};
 })();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1334,6 +1303,7 @@ if(shareDownloadBtn)shareDownloadBtn.onclick=async function(){var files;try{file
 <script src="weekly-admin.js"></script>
 <script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
 </body></html>
+
 
 
 
