@@ -68,73 +68,38 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 .rescued-flash{outline:3px solid #FF9800!important;background:#FFF9C4!important}
 #batchNote{color:#555;font-size:14px;margin:2px 0 10px}
 #backToTop{display:none;position:fixed;top:56px;right:8px;z-index:150;background:#fff;color:#111;border:2px solid #333;border-radius:20px;padding:6px 10px;font-size:14px;line-height:1.4;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.15)}
-@media (max-width:768px){body.weekly-approved #backToTop.show{display:block}}
-</style><style id="weeklyGateCss">body:not(.weekly-approved) .wrap{display:none!important}.wrap{padding-top:54px}#weeklyUtil{gap:4px!important;right:8px!important}#weeklyUtil button{padding:6px 10px!important;font-size:14px!important}#weeklyAdminPanel table{width:100%;border-collapse:collapse;min-width:640px}#weeklyAdminPanel th,#weeklyAdminPanel td{border-bottom:1px solid #ddd;padding:8px 6px;text-align:left;vertical-align:top;font-size:14px}#weeklyAdminPanel .cell-main{font-weight:700}#weeklyAdminPanel .cell-sub{font-size:13px;color:#666;word-break:break-all}#weeklyAdminPanel .mono{font-family:monospace;font-size:12px;word-break:break-all}#weeklyAdminPanel .status-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:13px;white-space:nowrap}#weeklyAdminPanel .status-badge.pending{background:#f3e3ac}#weeklyAdminPanel .status-badge.approved{background:#d9ead3}#weeklyAdminPanel .status-badge.rejected{background:#f4cccc}#weeklyAdminPanel .status-badge.suspended{background:#d9d9d9}#weeklyAdminPanel td.actions{white-space:nowrap}#weeklyAdminPanel td.actions button{cursor:pointer;border-radius:8px;border:2px solid #333;background:#fff;padding:4px 12px;font:inherit;font-size:14px;margin:2px}#weeklyAdminPanel td.actions button.danger{color:#D32F2F;border-color:#e0a8a8}#weeklyAdminPanel td.actions button.warn{background:#f3e3ac}#weeklyAdminPanel td.actions button.ghost{background:transparent}#weeklyAdminPanel .tabbtn.active{background:#111!important;color:#fff!important}</style></head><body><div id="weeklyGate" style="max-width:560px;margin:8vh auto;padding:28px;background:#fff;border:2px solid #333;border-radius:16px;line-height:1.8;color:#111">
-<h2 style="margin-top:0">每週會議快訊</h2>
-<p id="weeklyGateMsg">本週會快訊不公開，僅供核准成員閱讀。請先用 Google 帳號登入。</p>
-<div id="weeklyGateUser" style="display:none;margin:10px 0"></div>
-<button id="weeklySignIn" type="button" style="cursor:pointer;border-radius:10px;border:2px solid #333;background:#111;color:#fff;padding:10px 22px;font:inherit">Google 登入</button>
-<button id="weeklyApply" type="button" style="display:none;cursor:pointer;border-radius:10px;border:2px solid #333;background:#fff;color:#111;padding:10px 22px;font:inherit;margin-left:8px">申請加入</button>
-<button id="weeklySignOut" type="button" style="display:none;cursor:pointer;border-radius:10px;border:2px solid #333;background:#fff;color:#111;padding:10px 22px;font:inherit;margin-left:8px">登出</button>
-<div id="weeklyApplyForm" style="display:none;margin-top:16px">
-<label style="display:block;margin:10px 0">姓名<br><input id="weeklyApplyName" type="text" placeholder="求道名" style="width:100%;box-sizing:border-box;border:2px solid #333;border-radius:8px;padding:10px 12px;font:inherit"></label>
-<label style="display:block;margin:10px 0">單位<br><input id="weeklyApplyUnit" type="text" placeholder="例：中和" style="width:100%;box-sizing:border-box;border:2px solid #333;border-radius:8px;padding:10px 12px;font:inherit"></label>
-<label style="display:block;margin:10px 0">區別<br><input id="weeklyApplyDistrict" type="text" placeholder="例：2區" style="width:100%;box-sizing:border-box;border:2px solid #333;border-radius:8px;padding:10px 12px;font:inherit"></label>
-<button id="weeklyApplySubmit" type="button" style="cursor:pointer;border-radius:10px;border:2px solid #333;background:#111;color:#fff;padding:10px 22px;font:inherit">送出申請</button>
-<button id="weeklyApplyCancel" type="button" style="cursor:pointer;border-radius:10px;border:2px solid #333;background:#fff;color:#111;padding:10px 22px;font:inherit;margin-left:8px">取消</button>
-<p style="font-size:14px;color:#666">姓名、單位、區別三格都是必填，管理員審核時用來確認你的身分。本站是全新審核名單，之前在其他網站核准過仍需重新申請。</p>
-</div>
-<p style="font-size:14px;color:#666">請用 Safari 或 Chrome 直接開啟本頁再登入；LINE 等 App 內建瀏覽器無法完成 Google 登入，登入鍵會改為一鍵跳轉系統瀏覽器。</p>
-</div>
-<div id="weeklyUtil" style="position:fixed;top:10px;right:12px;z-index:900;display:flex;gap:6px;align-items:center">
+@media (max-width:768px){#backToTop.show{display:block}}
+</style><style id="weeklyAdminCss">/* 公開檢視：內文一律顯示，不需登入核准 */.wrap{padding-top:54px}#weeklyUtil{gap:4px!important;right:8px!important}#weeklyUtil button{padding:6px 10px!important;font-size:14px!important}body:not(.weekly-admin) .actions{display:none!important}
+body:not(.weekly-admin) .selcircle{display:none!important}
+body:not(.weekly-admin) .batchbar{display:none!important}
+body:not(.weekly-admin) #batchNote{display:none!important}
+body:not(.weekly-admin) #restoreAll,body:not(.weekly-admin) #deletedBtn{display:none!important}
+body:not(.weekly-admin) #undoBar{display:none!important}
+body:not(.weekly-admin) #editModal,body:not(.weekly-admin) #delModal,body:not(.weekly-admin) #deletedModal{display:none!important}
+body:not(.weekly-admin) .hint{display:none!important}
+body:not(.weekly-admin) #backToTop{display:none!important}
+.share-page{font-size:22px!important;line-height:1.35!important;padding:10px 12px!important}
+.share-page h2{font-size:30px!important;margin:6px 0 4px!important}
+.share-page .badge{font-size:18px!important}
+.share-page .row{margin:6px 0!important}
+.share-page .line{margin:2px 0!important}
+.share-page .page-ind{font-size:16px!important}
+.share-page .src{font-size:16px!important}</style></head><body><div id="weeklyUtil" style="position:fixed;top:10px;right:12px;z-index:900;display:flex;gap:6px;align-items:center">
 <span id="weeklyUtilUser" title="" style="display:none;width:30px;height:30px;border-radius:50%;overflow:hidden;align-items:center;justify-content:center;background:#111;color:#fff;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15);flex:none"></span>
-<button id="weeklyUtilSignIn" type="button" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;color:#111;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">登入</button>
+<button id="weeklyUtilSignIn" type="button" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;color:#111;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">管理者登入</button>
 <button id="weeklyUtilSignOut" type="button" style="display:none;cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;color:#111;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">登出</button>
 <button id="weeklyUtilRefresh" type="button" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#111;color:#fff;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">重新整理</button>
-<button id="weeklyUtilAdmin" type="button" style="display:none;cursor:pointer;border-radius:20px;border:2px solid #333;background:#8a6d1f;color:#fff;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">後台審核</button>
-</div>
-<div id="weeklyAdminPanel" style="display:none;position:fixed;inset:0;z-index:950;background:#fff;overflow-y:auto;color:#111">
-<div style="max-width:860px;margin:0 auto;padding:20px 16px 48px">
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-<h2 style="margin:0;flex:1 1 auto">後台審核</h2>
-<span style="font-size:14px;color:#666">僅 f216002@gmail.com</span>
-<button id="weeklyAdminClose" type="button" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#111;color:#fff;padding:6px 14px;font:inherit;font-size:14px">← 返回快訊</button>
-</div>
-<div id="weeklyAdminBlocked" style="display:none;margin-top:20px;background:#fff;border:2px solid #333;border-radius:12px;padding:20px">此帳號不是管理員，無法使用後台。請用 f216002@gmail.com 登入。</div>
-<div id="weeklyAdminApp">
-<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
-<button type="button" data-admin-tab="requests" class="tabbtn active" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;padding:6px 16px;font:inherit;font-size:14px">待審核申請（<span id="weeklyReqCount">0 筆</span>）</button>
-<button type="button" data-admin-tab="teachers" class="tabbtn" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;padding:6px 16px;font:inherit;font-size:14px">已核准成員（<span id="weeklyTeacherCount">0 位</span>）</button>
-</div>
-<div id="tabAdminRequests">
-<div style="margin-top:16px"><button id="weeklyApproveAll" type="button" style="cursor:pointer;border-radius:10px;border:2px solid #333;background:#8a6d1f;color:#fff;padding:8px 18px;font:inherit">批次核准全部待審核</button></div>
-<div style="margin-top:12px;background:#fff;border:2px solid #333;border-radius:12px;overflow-x:auto">
-<table><thead><tr><th>姓名／信箱</th><th>UID</th><th>申請時間</th><th>狀態</th><th>操作</th></tr></thead>
-<tbody id="weeklyReqBody"></tbody></table>
-</div>
-<p id="weeklyReqEmpty" style="color:#666">目前沒有申請。</p>
-</div>
-<div id="tabAdminTeachers" hidden>
-<div style="margin-top:12px;background:#fff;border:2px solid #333;border-radius:12px;overflow-x:auto">
-<table><thead><tr><th>姓名／信箱</th><th>UID</th><th>核准時間</th><th>狀態</th><th>操作</th></tr></thead>
-<tbody id="weeklyTeacherBody"></tbody></table>
-</div>
-<p id="weeklyTeacherEmpty" style="color:#666">目前沒有已核准成員。</p>
-</div>
-</div>
-<div id="weeklyAdminToast" style="display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:960;max-width:90vw;text-align:center"></div>
-</div>
 </div>
 <button id="backToTop" type="button" aria-label="回到頁首">↑ Top</button>
 <div class="wrap">
 <h1>2026年11月03日</h1>
-<p class="hint">長按任一小卡可編輯／刪除</p>
-<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelDownload" type="button" disabled>下載全部圖片</button><button id="shareSelBatches" type="button" disabled>一次傳多頁（非 LINE）</button></div><p id="batchNote">分享已選是逐頁分享到 LINE：按一次分享一頁，傳完按下一頁；長卡會自動切成多頁，每頁在 LINE 裡都看得清楚。LINE 一次傳多頁時只會收到最後一頁，所以不要用一次多頁傳到 LINE。也可以先按「下載全部圖片」，再到 LINE 自己的選照片一次選多頁傳出。</p>
+<p class="hint">管理者登入後，長按任一小卡可編輯／刪除；未登入者只能檢視。</p>
+<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelDownload" type="button" disabled>下載全部圖片</button><button id="shareSelBatches" type="button" disabled>一次傳多頁（非 LINE）</button></div><p id="batchNote">分享已選是逐頁分享到 LINE：按一次分享一頁，傳完按下一頁；每個事件最多 3 頁，總張數是各事件頁數之和，內容不刪減。LINE 一次傳多頁時只會收到最後一頁，所以不要用一次多頁傳到 LINE。也可以先按「下載全部圖片」，再到 LINE 自己的選照片一次選多頁傳出。</p>
 <div class="filters" id="filters">
 <button data-f="all" class="on">全部</button><button data-f="A">A 馬上執行</button><button data-f="B">B 近期班期</button><button data-f="C">C 公告參考</button>
 <span class="fonts" style="margin-left:auto"><button id="fsDown">A-</button><button id="fsUp">A+</button></span>
 </div>
-<p class="foot">本頁為去敏感化公開版：線上會議帳號密碼、個人電話、聯絡信箱、清口與安堂個人名單、各區出席大表皆不在本頁公開。首頁永遠只顯示最新已發布的一週。</p>
+<p class="foot">本頁為去敏感化版：線上會議帳號密碼、個人電話、聯絡信箱、清口與安堂個人名單、各區出席大表皆不在本頁公開。首頁永遠只顯示最新已發布的一週。本頁已設 noindex、robots.txt 拒絕收錄，僅知道連結的人可閱讀，但不是真正私密（見 RULES.md 第 12 節）；只有管理者登入後才有編輯與分享功能。</p>
 
 <div class="sec">A 馬上執行（13張）</div>
 <article class="card a" data-cat="A">
@@ -780,10 +745,24 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 // in original order, split at field boundaries where possible, then by line,
 // then by text chunk if a single line alone is taller than a page.
 // Returns an array of Blobs, in page order. Caller assigns filenames.
+// Paginated card capture, share-only layout, hard cap 3 pages per big card.
+// Problem it fixes: the old capture reused the webpage font, so a user who had
+// pressed A+ (card font up to 44px) got dozens of sliver pages for one card
+// (Cheng reported 35 for 年懺). Share pages now use a FIXED tight layout
+// independent of the webpage A+/A- setting, and the page height is raised
+// adaptively until the card fits in 3 pages. Nothing is ever deleted,
+// simplified or reordered to meet the cap: if a card still cannot fit in 3
+// pages, this function throws instead of silently outputting a 4th page
+// or dropping a field.
+// Share layout (fixed, webpage font/layout untouched):
+//   font 22px, line-height 1.35, card padding 10px 12px, title 30px,
+//   badge 18px, page indicator 16px, row margin 6px, line margin 2px.
+// Page height: starts at min(width*6, 2400), then +25% per repack until
+// pages <= 3. At phone width ~362px the start height is 2172px.
+// Webpage is untouched; only the captured image is paginated.
 async function captureCardPages(card){
   if(!window.html2canvas){throw new Error('圖片產生器載入失敗，請檢查網路後重試，或先用複製文字');}
   var width=card.offsetWidth||card.clientWidth||360;
-  var maxH=Math.round(width*2);
   var badgeEl=card.querySelector('.badge');
   var titleEl=card.querySelector('h2');
   var srcEl=card.querySelector('.src');
@@ -809,44 +788,72 @@ async function captureCardPages(card){
     }
     if(lines.length>0)units.push({key:k?k.textContent:'',lines:lines});
   });
-  var stage=document.createElement('div');
-  stage.style.cssText='position:absolute;left:-10000px;top:0;width:'+width+'px;';
-  document.body.appendChild(stage);
-  var pageEls=[];
-  var seenKeys={};
-  var curPage=null,curRow=null,curRowKey=null;
-  function makePage(){
-    var el=document.createElement('article');
-    el.className=cardClass;el.style.margin='0';
-    var b=document.createElement('span');b.className=badgeClass;b.textContent=badgeText;el.appendChild(b);
-    var h=document.createElement('h2');h.textContent=titleText;el.appendChild(h);
-    var ind=document.createElement('div');ind.className='page-ind';
-    ind.style.cssText='font-size:18px;color:#555;margin:2px 0 8px';
-    ind.textContent='第1/1頁';el.appendChild(ind);
-    stage.appendChild(el);pageEls.push(el);curPage=el;curRow=null;curRowKey=null;
-    return el;
-  }
-  function closePage(){
-    if(!curPage)return;
-    curPage.querySelectorAll('.row').forEach(function(r){
-      var kk=r.querySelector('.k');if(kk)seenKeys[kk.textContent.replace(/（續）$/,'')]=true;
-    });
-    curPage=null;curRow=null;curRowKey=null;
-  }
-  function makeRow(key){
-    var row=document.createElement('div');row.className='row';
-    var kk=document.createElement('div');kk.className='k';
-    kk.textContent=seenKeys[key]?key+'（續）':key;row.appendChild(kk);
-    var vv=document.createElement('div');vv.className='v';row.appendChild(vv);
-    curPage.appendChild(row);curRow=row;curRowKey=key;
-    return vv;
-  }
-  function ensureRow(key){
-    if(!curPage)makePage();
-    if(!curRow||curRowKey!==key)return makeRow(key);
-    return curRow.querySelector('.v');
-  }
-  try{
+  var MAX_PAGES=3;
+  function pack(maxH){
+    var stage=document.createElement('div');
+    stage.style.cssText='position:absolute;left:-10000px;top:0;width:'+width+'px;';
+    document.body.appendChild(stage);
+    var pageEls=[];
+    var seenKeys={};
+    var curPage=null,curRow=null,curRowKey=null;
+    function makePage(){
+      var el=document.createElement('article');
+      el.className=cardClass+' share-page';el.style.margin='0';
+      var b=document.createElement('span');b.className=badgeClass;b.textContent=badgeText;el.appendChild(b);
+      var h=document.createElement('h2');h.textContent=titleText;el.appendChild(h);
+      var ind=document.createElement('div');ind.className='page-ind';
+      ind.style.cssText='font-size:16px;color:#555;margin:2px 0 8px';
+      ind.textContent='第1/1頁';el.appendChild(ind);
+      stage.appendChild(el);pageEls.push(el);curPage=el;curRow=null;curRowKey=null;
+      return el;
+    }
+    function closePage(){
+      if(!curPage)return;
+      curPage.querySelectorAll('.row').forEach(function(r){
+        var kk=r.querySelector('.k');if(kk)seenKeys[kk.textContent.replace(/（續）$/,'')]=true;
+      });
+      curPage=null;curRow=null;curRowKey=null;
+    }
+    function makeRow(key){
+      var row=document.createElement('div');row.className='row';
+      var kk=document.createElement('div');kk.className='k';
+      kk.textContent=seenKeys[key]?key+'（續）':key;row.appendChild(kk);
+      var vv=document.createElement('div');vv.className='v';row.appendChild(vv);
+      curPage.appendChild(row);curRow=row;curRowKey=key;
+      return vv;
+    }
+    function ensureRow(key){
+      if(!curPage)makePage();
+      if(!curRow||curRowKey!==key)return makeRow(key);
+      return curRow.querySelector('.v');
+    }
+    function splitLineText(key,lineNode){
+      var text=lineNode.textContent||'';
+      if(!text)return;
+      var pos=0;
+      while(pos<text.length){
+        var v=ensureRow(key);
+        var probe=document.createElement('div');probe.className='line';v.appendChild(probe);
+        var chunk='';
+        while(pos+chunk.length<text.length){
+          var cand=text.substr(pos,chunk.length+50);
+          probe.textContent=cand;
+          if(curPage.offsetHeight>maxH)break;
+          chunk=cand;
+        }
+        if(!chunk){
+          for(var n=1;n<=50&&pos+n<=text.length;n++){
+            probe.textContent=text.substr(pos,n);
+            if(curPage.offsetHeight>maxH)break;
+            chunk=text.substr(pos,n);
+          }
+          if(!chunk){chunk=text.charAt(pos);}
+        }
+        probe.textContent=chunk;
+        pos+=chunk.length;
+        if(pos<text.length){closePage();makePage();}
+      }
+    }
     makePage();
     units.forEach(function(unit){
       unit.lines.forEach(function(lineNode){
@@ -855,24 +862,19 @@ async function captureCardPages(card){
         if(curPage.offsetHeight>maxH){
           v.removeChild(ln);
           if(v.childNodes.length>0){
-            // Row has other lines on this page: close page, continue on next.
             closePage();makePage();
             var v2=ensureRow(unit.key);v2.appendChild(lineNode.cloneNode(true));
             if(curPage.offsetHeight>maxH){
-              // Still too tall: single line alone exceeds a page.
               v2.removeChild(v2.lastChild);
               splitLineText(unit.key,lineNode);
             }
           }else{
-            // Single line alone exceeds a page.
             splitLineText(unit.key,lineNode);
           }
         }
       });
-      // Next field starts a fresh row even if it shares a key with this one.
       curRow=null;curRowKey=null;
     });
-    // Source note on the last page only; if it pushes the page over, it gets its own page.
     if(srcText){
       var last=pageEls[pageEls.length-1];
       var s=document.createElement('div');s.className='src';s.textContent=srcText;last.appendChild(s);
@@ -882,57 +884,36 @@ async function captureCardPages(card){
         var s2=document.createElement('div');s2.className='src';s2.textContent=srcText;curPage.appendChild(s2);
       }
     }
-    var total=pageEls.length;
-    pageEls.forEach(function(p,i){
+    return {stage:stage,pageEls:pageEls};
+  }
+  var maxH=Math.min(Math.round(width*6),2400);
+  var packed=pack(maxH);
+  var attempts=0;
+  while(packed.pageEls.length>MAX_PAGES&&attempts<20){
+    if(packed.stage.parentNode)packed.stage.parentNode.removeChild(packed.stage);
+    maxH=Math.ceil(maxH*1.25);attempts++;
+    packed=pack(maxH);
+  }
+  if(packed.pageEls.length>MAX_PAGES){
+    if(packed.stage.parentNode)packed.stage.parentNode.removeChild(packed.stage);
+    throw new Error('此事件內容過長，即使放寬分享頁高也無法在3頁內完整呈現且不刪內容，請聯繫管理者（未刪任何內容，也未輸出第4頁）');
+  }
+  try{
+    var total=packed.pageEls.length;
+    packed.pageEls.forEach(function(p,i){
       var ind=p.querySelector('.page-ind');
       if(ind)ind.textContent='第'+(i+1)+'/'+total+'頁';
     });
     var blobs=[];
-    for(var i=0;i<pageEls.length;i++){
-      var cv=await html2canvas(pageEls[i],{backgroundColor:'#ffffff',scale:2});
+    for(var i=0;i<packed.pageEls.length;i++){
+      var cv=await html2canvas(packed.pageEls[i],{backgroundColor:'#ffffff',scale:2});
       var blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
       if(!blob)throw new Error('無法產生圖片檔案（第'+(i+1)+'/'+total+'頁）');
       blobs.push(blob);
     }
     return blobs;
   }finally{
-    if(stage.parentNode)stage.parentNode.removeChild(stage);
-  }
-  // Split one over-tall line's text into page-sized chunks (DOM text split,
-  // so style is preserved and the header is repeated on every page).
-  function splitLineText(key,lineNode){
-    var text=lineNode.textContent||'';
-    if(!text)return;
-    var pos=0;
-    while(pos<text.length){
-      var v=ensureRow(key);
-      // One probe div whose text grows in 50-char batches; it stays in the
-      // page as the final chunk, so no text is ever duplicated.
-      var probe=document.createElement('div');probe.className='line';v.appendChild(probe);
-      var chunk='';
-      while(pos+chunk.length<text.length){
-        var cand=text.substr(pos,chunk.length+50);
-        probe.textContent=cand;
-        if(curPage.offsetHeight>maxH)break;
-        chunk=cand;
-      }
-      if(!chunk){
-        // Page is already nearly full: grow one character at a time.
-        for(var n=1;n<=50&&pos+n<=text.length;n++){
-          probe.textContent=text.substr(pos,n);
-          if(curPage.offsetHeight>maxH)break;
-          chunk=text.substr(pos,n);
-        }
-        if(!chunk){chunk=text.charAt(pos);}
-        // Last resort keeps the character rather than dropping content.
-      }
-      // Always reset the probe to exactly the chunk: the loop above leaves
-      // it holding the one overshooting character, which would otherwise
-      // be repeated as the first character of the next page's chunk.
-      probe.textContent=chunk;
-      pos+=chunk.length;
-      if(pos<text.length){closePage();makePage();}
-    }
+    if(packed.stage.parentNode)packed.stage.parentNode.removeChild(packed.stage);
   }
 }
 </script>
@@ -945,8 +926,8 @@ const cb=document.getElementById('cBody'),ct=document.getElementById('cToggle');
 if(ct){ct.onclick=()=>{const h=cb.classList.toggle('collapsed');ct.textContent=h?'展開':'收合'};}
 function cardText(card){var NL=String.fromCharCode(10);var t=card.querySelector('h2').innerText+NL+card.querySelector('.badge').innerText+NL;card.querySelectorAll('.row').forEach(function(r){if(r.style.display==='none')return;t+=r.querySelector('.k').innerText+NL;r.querySelectorAll('.line').forEach(function(l){t+=l.innerText+NL;});});return t;}
 document.querySelectorAll('.card').forEach(card=>{
-card.querySelector('.copy').onclick=async()=>{const t=cardText(card);try{await navigator.clipboard.writeText(t);alert('已複製文字')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('已複製文字')}};
-card.querySelector('.share').onclick=async()=>{
+card.querySelector('.copy').onclick=async()=>{if(!window.isWeeklyAdmin){return;}const t=cardText(card);try{await navigator.clipboard.writeText(t);alert('已複製文字')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('已複製文字')}};
+card.querySelector('.share').onclick=async()=>{if(!window.isWeeklyAdmin){return;}
 if(!window.html2canvas){
   try{await new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}catch(_){}
 }
@@ -1021,7 +1002,7 @@ document.querySelectorAll('.card').forEach(function(card,ci){
   }
 });
 var restore=document.getElementById('restoreAll');
-if(restore)restore.onclick=function(){try{localStorage.removeItem(LS);}catch(_){}location.reload();};
+if(restore)restore.onclick=function(){if(!window.isWeeklyAdmin)return;try{localStorage.removeItem(LS);}catch(_){}location.reload();};
 function escHtml2(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function cardTitleOf(card){var h=card.querySelector('h2');return h?h.textContent:'';}
 function rowMeta(card,row,key){var m=(state.deletedMeta.rows&&state.deletedMeta.rows[key])||null;if(m)return m;var k=row.querySelector('.k');var first=row.querySelector('.line');return{card:cardTitleOf(card),field:k?k.textContent:'',preview:first?first.textContent:'',edited:!!state.editedRows[key]};}
@@ -1030,10 +1011,10 @@ function updateDeletedBtn(){var b=document.getElementById('deletedBtn');if(!b)re
 function rescueAndReload(kind,id){if(kind==='row'){var ix=state.deletedRows.indexOf(id);if(ix>=0)state.deletedRows.splice(ix,1);if(state.deletedMeta.rows)delete state.deletedMeta.rows[id];}else{var ci=Number(id);var ix2=state.deletedCards.indexOf(ci);if(ix2>=0)state.deletedCards.splice(ix2,1);var meta=state.deletedMeta.cards?state.deletedMeta.cards[ci]:null;if(state.deletedMeta.cards)delete state.deletedMeta.cards[ci];if(meta&&meta.selected){try{var sArr=JSON.parse(localStorage.getItem('weekly-bulletin-select-v1')||'[]');if(sArr.indexOf(ci)<0){sArr.push(ci);localStorage.setItem('weekly-bulletin-select-v1',JSON.stringify(sArr));}}catch(_){}}}persist();try{sessionStorage.setItem('bulletin-rescued',kind+'|'+id);}catch(_){}location.reload();}
 var undoTimer=null,undoTarget=null;
 function showUndo(label,kind,id){var bar=document.getElementById('undoBar');if(!bar)return;document.getElementById('undoText').textContent='已刪除「'+label+'」';undoTarget={kind:kind,id:id};bar.classList.add('show');if(undoTimer)clearTimeout(undoTimer);undoTimer=setTimeout(function(){bar.classList.remove('show');},12000);}
-document.getElementById('undoRestore').onclick=function(){if(!undoTarget)return;var t=undoTarget;document.getElementById('undoBar').classList.remove('show');rescueAndReload(t.kind,t.id);};
+document.getElementById('undoRestore').onclick=function(){if(!window.isWeeklyAdmin)return;if(!undoTarget)return;var t=undoTarget;document.getElementById('undoBar').classList.remove('show');rescueAndReload(t.kind,t.id);};
 document.getElementById('undoClose').onclick=function(){document.getElementById('undoBar').classList.remove('show');};
 function openDeletedModal(){var list=document.getElementById('deletedList');if(!list)return;var html='';state.deletedRows.forEach(function(key){var parts=key.split(':');var ci=Number(parts[0]);var card=cards[ci];if(!card)return;var row=card.querySelectorAll('.row')[Number(parts[1])];if(!row)return;var m=rowMeta(card,row,key);html+='<div class="deleted-item"><div><div><strong>'+escHtml2(m.card)+' — '+escHtml2(m.field)+'</strong></div><div class="meta">'+escHtml2(m.preview)+(m.edited?'（曾編輯，救回後保留編輯後內容）':'')+'</div></div><button type="button" data-kind="row" data-id="'+escHtml2(key)+'">復原</button></div>';});state.deletedCards.forEach(function(ci){var card=cards[ci];if(!card)return;var m=cardMeta(card,ci);html+='<div class="deleted-item"><div><div><strong>'+escHtml2(m.title)+'（整張大卡）</strong></div><div class="meta">'+escHtml2(m.badge)+(m.edited?'（曾編輯，救回後保留編輯後內容）':'')+(m.selected?'（救回後恢復勾選）':'')+'</div></div><button type="button" data-kind="card" data-id="'+ci+'">復原</button></div>';});if(!html)html='<p>目前沒有已刪除的項目。</p>';list.innerHTML=html;list.querySelectorAll('button[data-kind]').forEach(function(b){b.onclick=function(){rescueAndReload(b.getAttribute('data-kind'),b.getAttribute('data-id'));};});document.getElementById('deletedModal').classList.add('open');}
-document.getElementById('deletedBtn').onclick=openDeletedModal;
+document.getElementById('deletedBtn').onclick=function(){if(!window.isWeeklyAdmin)return;openDeletedModal();};
 document.getElementById('deletedClose').onclick=function(){document.getElementById('deletedModal').classList.remove('open');};
 updateDeletedBtn();
 var editModal=document.getElementById('editModal'),delModal=document.getElementById('delModal');
@@ -1047,6 +1028,7 @@ document.getElementById('editCancel').onclick=closeEdit;
 document.getElementById('delCancel').onclick=closeDel;
 document.getElementById('delConfirm').onclick=function(){var fn=pendingDelete;closeDel();closeEdit();if(fn)fn();};
 document.getElementById('editSave').onclick=function(){
+  if(!window.isWeeklyAdmin)return;
   if(!target)return;
   if(target.kind==='row'){
     var lines=document.getElementById('editArea').value.split(NL10);
@@ -1063,6 +1045,7 @@ document.getElementById('editSave').onclick=function(){
   persist();closeEdit();
 };
 document.getElementById('editDelete').onclick=function(){
+  if(!window.isWeeklyAdmin)return;
   if(!target)return;
   if(target.kind==='row'){
     var card=target.card,row=target.row;
@@ -1073,6 +1056,7 @@ document.getElementById('editDelete').onclick=function(){
   }
 };
 function openSmallEdit(card,row){
+  if(!window.isWeeklyAdmin)return;
   var k=row.querySelector('.k');editTitle.textContent=card.querySelector('h2').textContent+' — '+(k?k.textContent:'');
   var lines=[];row.querySelectorAll('.line').forEach(function(l){lines.push(l.textContent);});
   editFields.innerHTML='<textarea id="editArea"></textarea>';
@@ -1080,6 +1064,7 @@ function openSmallEdit(card,row){
   target={kind:'row',card:card,row:row};openEdit();
 }
 function openBigEdit(card){
+  if(!window.isWeeklyAdmin)return;
   editTitle.textContent='編輯大卡';
   editFields.innerHTML='<label>標題<br><input id="editTitleInput"></label><br><label>日期<br><input id="editBadgeInput"></label>';
   document.getElementById('editTitleInput').value=card.querySelector('h2').textContent;
@@ -1162,15 +1147,15 @@ cards.forEach(function(card){
   var ci=Number(card.dataset.ci);
   if(sel.indexOf(ci)>=0){btn.classList.add('on');btn.setAttribute('aria-pressed','true');}
   btn.addEventListener('click',function(e){
-    e.stopPropagation();
+    e.stopPropagation();if(!window.isWeeklyAdmin)return;
     var on=!btn.classList.contains('on');
     setSel(card,on,true);saveSel();updateCount();
   });
 });
 var selAll=document.getElementById('selAll');
-if(selAll)selAll.onclick=function(){cards.forEach(function(c){setSel(c,true,true);});saveSel();updateCount();};
+if(selAll)selAll.onclick=function(){if(!window.isWeeklyAdmin)return;cards.forEach(function(c){setSel(c,true,true);});saveSel();updateCount();};
 var selNone=document.getElementById('selNone');
-if(selNone)selNone.onclick=function(){cards.forEach(function(c){setSel(c,false,true);});saveSel();updateCount();};
+if(selNone)selNone.onclick=function(){if(!window.isWeeklyAdmin)return;cards.forEach(function(c){setSel(c,false,true);});saveSel();updateCount();};
 updateCount();
 async function ensureCanvas(){
   if(window.html2canvas)return true;
@@ -1190,6 +1175,7 @@ document.getElementById('batchFallbackDownload').onclick=function(){var f=batchF
 document.getElementById('batchFallbackSeq').onclick=async function(){closeBatchFallback();await shareNextSequential();};
 document.getElementById('batchFallbackMulti').onclick=async function(){closeBatchFallback();await shareSelectedMultiFile();};
 async function generateSelectedFiles(){
+  if(!window.isWeeklyAdmin){alert('分享功能僅限管理者，請先用管理者帳號登入。');return null;}
   if(!sel||sel.length===0){alert('請先勾選要分享的大卡');return null;}
   if(!(await ensureCanvas())){throw new Error('圖片產生器載入失敗，請檢查網路後重試，或先用複製文字');}
   var deletedCards=[];
@@ -1291,10 +1277,10 @@ if(shareDownloadBtn)shareDownloadBtn.onclick=async function(){var files;try{file
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="weekly-gate.js"></script>
-<script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=document.body.classList.contains('weekly-approved')&&y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
+<script src="weekly-admin.js"></script>
+<script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
 </body></html>
+
 
 
 
