@@ -1,3 +1,4 @@
+sha: 79351b5ebe03062926e7900f26a418c7c7f89b54
 <!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>每週會議快訊</title>
 <meta name="robots" content="noindex, nofollow">
@@ -129,7 +130,7 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 <div class="wrap">
 <h1>2026年11月03日</h1>
 <p class="hint">長按任一小卡可編輯／刪除</p>
-<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelDownload" type="button" disabled>下載全部圖片</button><button id="shareSelBatches" type="button" disabled>一次傳多張（非 LINE）</button></div><p id="batchNote">分享已選是逐張分享到 LINE：按一次分享一張，傳完按下一張；LINE 一次傳多張時只會收到最後一張，所以不要用一次多張傳到 LINE。也可以先按「下載全部圖片」，再到 LINE 自己的選照片一次選多張傳出。</p>
+<div style="margin-bottom:10px"><button id="restoreAll">還原全部</button> <button id="deletedBtn" type="button">已刪除</button></div><div class="batchbar"><button id="selAll" type="button">全選</button><button id="selNone" type="button">取消全選</button><button id="shareSel" type="button" disabled>分享已選</button><button id="shareSelDownload" type="button" disabled>下載全部圖片</button><button id="shareSelBatches" type="button" disabled>一次傳多頁（非 LINE）</button></div><p id="batchNote">分享已選是逐頁分享到 LINE：按一次分享一頁，傳完按下一頁；長卡會自動切成多頁，每頁在 LINE 裡都看得清楚。LINE 一次傳多頁時只會收到最後一頁，所以不要用一次多頁傳到 LINE。也可以先按「下載全部圖片」，再到 LINE 自己的選照片一次選多頁傳出。</p>
 <div class="filters" id="filters">
 <button data-f="all" class="on">全部</button><button data-f="A">A 馬上執行</button><button data-f="B">B 近期班期</button><button data-f="C">C 公告參考</button>
 <span class="fonts" style="margin-left:auto"><button id="fsDown">A-</button><button id="fsUp">A+</button></span>
@@ -701,6 +702,171 @@ body.lp-holding,body.lp-holding *{user-select:none!important;-webkit-user-select
 </div>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
+// Paginated card capture: splits a tall card into readable page images.
+// Page rule: each page keeps the card width, height <= 2x width, so LINE
+// preview (which fits the whole height to the screen) keeps short-card text size.
+// Webpage is untouched; only the captured image is paginated. Content is never
+// deleted, simplified or reordered: every visible row/line appears exactly once,
+// in original order, split at field boundaries where possible, then by line,
+// then by text chunk if a single line alone is taller than a page.
+// Returns an array of Blobs, in page order. Caller assigns filenames.
+async function captureCardPages(card){
+  if(!window.html2canvas){throw new Error('圖片產生器載入失敗，請檢查網路後重試，或先用複製文字');}
+  var width=card.offsetWidth||card.clientWidth||360;
+  var maxH=Math.round(width*2);
+  var badgeEl=card.querySelector('.badge');
+  var titleEl=card.querySelector('h2');
+  var srcEl=card.querySelector('.src');
+  var badgeText=badgeEl?badgeEl.textContent:'';
+  var badgeClass=badgeEl?badgeEl.className:'badge';
+  var titleText=titleEl?titleEl.textContent:'';
+  var cardClass=card.className||'card';
+  var srcText=srcEl?srcEl.textContent:'';
+  var units=[];
+  card.querySelectorAll('.row').forEach(function(r){
+    if(r.style.display==='none')return;
+    var k=r.querySelector('.k');
+    var lines=[];
+    r.querySelectorAll('.line').forEach(function(l){
+      if(l.style.display==='none')return;
+      lines.push(l.cloneNode(true));
+    });
+    if(lines.length===0){
+      var v=r.querySelector('.v');
+      if(v&&v.textContent.trim()){
+        var d=document.createElement('div');d.className='line';d.textContent=v.textContent;lines.push(d);
+      }
+    }
+    if(lines.length>0)units.push({key:k?k.textContent:'',lines:lines});
+  });
+  var stage=document.createElement('div');
+  stage.style.cssText='position:absolute;left:-10000px;top:0;width:'+width+'px;';
+  document.body.appendChild(stage);
+  var pageEls=[];
+  var seenKeys={};
+  var curPage=null,curRow=null,curRowKey=null;
+  function makePage(){
+    var el=document.createElement('article');
+    el.className=cardClass;el.style.margin='0';
+    var b=document.createElement('span');b.className=badgeClass;b.textContent=badgeText;el.appendChild(b);
+    var h=document.createElement('h2');h.textContent=titleText;el.appendChild(h);
+    var ind=document.createElement('div');ind.className='page-ind';
+    ind.style.cssText='font-size:18px;color:#555;margin:2px 0 8px';
+    ind.textContent='第1/1頁';el.appendChild(ind);
+    stage.appendChild(el);pageEls.push(el);curPage=el;curRow=null;curRowKey=null;
+    return el;
+  }
+  function closePage(){
+    if(!curPage)return;
+    curPage.querySelectorAll('.row').forEach(function(r){
+      var kk=r.querySelector('.k');if(kk)seenKeys[kk.textContent.replace(/（續）$/,'')]=true;
+    });
+    curPage=null;curRow=null;curRowKey=null;
+  }
+  function makeRow(key){
+    var row=document.createElement('div');row.className='row';
+    var kk=document.createElement('div');kk.className='k';
+    kk.textContent=seenKeys[key]?key+'（續）':key;row.appendChild(kk);
+    var vv=document.createElement('div');vv.className='v';row.appendChild(vv);
+    curPage.appendChild(row);curRow=row;curRowKey=key;
+    return vv;
+  }
+  function ensureRow(key){
+    if(!curPage)makePage();
+    if(!curRow||curRowKey!==key)return makeRow(key);
+    return curRow.querySelector('.v');
+  }
+  try{
+    makePage();
+    units.forEach(function(unit){
+      unit.lines.forEach(function(lineNode){
+        var v=ensureRow(unit.key);
+        var ln=lineNode.cloneNode(true);v.appendChild(ln);
+        if(curPage.offsetHeight>maxH){
+          v.removeChild(ln);
+          if(v.childNodes.length>0){
+            // Row has other lines on this page: close page, continue on next.
+            closePage();makePage();
+            var v2=ensureRow(unit.key);v2.appendChild(lineNode.cloneNode(true));
+            if(curPage.offsetHeight>maxH){
+              // Still too tall: single line alone exceeds a page.
+              v2.removeChild(v2.lastChild);
+              splitLineText(unit.key,lineNode);
+            }
+          }else{
+            // Single line alone exceeds a page.
+            splitLineText(unit.key,lineNode);
+          }
+        }
+      });
+      // Next field starts a fresh row even if it shares a key with this one.
+      curRow=null;curRowKey=null;
+    });
+    // Source note on the last page only; if it pushes the page over, it gets its own page.
+    if(srcText){
+      var last=pageEls[pageEls.length-1];
+      var s=document.createElement('div');s.className='src';s.textContent=srcText;last.appendChild(s);
+      if(last.offsetHeight>maxH){
+        last.removeChild(s);
+        closePage();makePage();
+        var s2=document.createElement('div');s2.className='src';s2.textContent=srcText;curPage.appendChild(s2);
+      }
+    }
+    var total=pageEls.length;
+    pageEls.forEach(function(p,i){
+      var ind=p.querySelector('.page-ind');
+      if(ind)ind.textContent='第'+(i+1)+'/'+total+'頁';
+    });
+    var blobs=[];
+    for(var i=0;i<pageEls.length;i++){
+      var cv=await html2canvas(pageEls[i],{backgroundColor:'#ffffff',scale:2});
+      var blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
+      if(!blob)throw new Error('無法產生圖片檔案（第'+(i+1)+'/'+total+'頁）');
+      blobs.push(blob);
+    }
+    return blobs;
+  }finally{
+    if(stage.parentNode)stage.parentNode.removeChild(stage);
+  }
+  // Split one over-tall line's text into page-sized chunks (DOM text split,
+  // so style is preserved and the header is repeated on every page).
+  function splitLineText(key,lineNode){
+    var text=lineNode.textContent||'';
+    if(!text)return;
+    var pos=0;
+    while(pos<text.length){
+      var v=ensureRow(key);
+      // One probe div whose text grows in 50-char batches; it stays in the
+      // page as the final chunk, so no text is ever duplicated.
+      var probe=document.createElement('div');probe.className='line';v.appendChild(probe);
+      var chunk='';
+      while(pos+chunk.length<text.length){
+        var cand=text.substr(pos,chunk.length+50);
+        probe.textContent=cand;
+        if(curPage.offsetHeight>maxH)break;
+        chunk=cand;
+      }
+      if(!chunk){
+        // Page is already nearly full: grow one character at a time.
+        for(var n=1;n<=50&&pos+n<=text.length;n++){
+          probe.textContent=text.substr(pos,n);
+          if(curPage.offsetHeight>maxH)break;
+          chunk=text.substr(pos,n);
+        }
+        if(!chunk){chunk=text.charAt(pos);}
+        // Last resort keeps the character rather than dropping content.
+      }
+      // Always reset the probe to exactly the chunk: the loop above leaves
+      // it holding the one overshooting character, which would otherwise
+      // be repeated as the first character of the next page's chunk.
+      probe.textContent=chunk;
+      pos+=chunk.length;
+      if(pos<text.length){closePage();makePage();}
+    }
+  }
+}
+</script>
+<script>
 let fs=16;
 document.getElementById('fsUp').onclick=()=>{fs=Math.min(22,fs+1);document.documentElement.style.setProperty('--base',fs+'px')};
 document.getElementById('fsDown').onclick=()=>{fs=Math.max(14,fs-1);document.documentElement.style.setProperty('--base',fs+'px')};
@@ -717,18 +883,37 @@ if(!window.html2canvas){
 if(!window.html2canvas){alert('圖片產生器載入失敗，請檢查網路後重試，或先用複製文字');return;}
 const acts=card.querySelector('.actions');acts.style.display='none';var selHide=card.querySelector('.selcircle');if(selHide)selHide.style.display='none';
 try{
-  const cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
-  const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
-  if(!blob)throw new Error('無法產生圖片檔案');
-  const file=new File([blob],'meeting-card.png',{type:'image/png'});
-  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
-    try{await navigator.share({files:[file]});return;}
-    catch(se){if(se && se.name==='AbortError')return;}
+  const blobs=await captureCardPages(card);
+  if(blobs.length===1){
+    const file=new File([blobs[0]],'meeting-card.png',{type:'image/png'});
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      try{await navigator.share({files:[file]});return;}
+      catch(se){if(se && se.name==='AbortError')return;}
+    }
+    const url=URL.createObjectURL(blobs[0]);
+    const a=document.createElement('a');a.href=url;a.download='meeting-card.png';document.body.appendChild(a);a.click();a.remove();
+    window.open(url,'_blank');
+    alert('系統分享不支援，已開啟圖片分頁，請用系統分享鍵傳到 LINE，或在下載資料夾找 meeting-card.png');
+    return;
   }
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='meeting-card.png';document.body.appendChild(a);a.click();a.remove();
-  window.open(url,'_blank');
-  alert('系統分享不支援，已開啟圖片分頁，請用系統分享鍵傳到 LINE，或在下載資料夾找 meeting-card.png');
+  // Long card: sequential single-file sharing, one page at a time, in order.
+  var sharedPages=0;
+  for(var pi=0;pi<blobs.length;pi++){
+    var pageFile=new File([blobs[pi]],'meeting-card-'+(pi+1)+'.png',{type:'image/png'});
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[pageFile]}))){
+      try{await navigator.share({files:[pageFile]});sharedPages++;}
+      catch(se){
+        if(se && se.name==='AbortError'){alert('逐頁分享已取消：已分享 '+sharedPages+' 頁，尚餘 '+(blobs.length-sharedPages)+' 頁。');return;}
+        throw se;
+      }
+      if(pi+1<blobs.length){alert('第 '+(pi+1)+'/'+blobs.length+' 頁已分享，尚餘 '+(blobs.length-pi-1)+' 頁，點確定繼續分享下一頁。');}
+    }else{
+      blobs.forEach(function(b,i){var url=URL.createObjectURL(b);var a=document.createElement('a');a.href=url;a.download='meeting-card-'+(i+1)+'.png';document.body.appendChild(a);a.click();a.remove();if(i===0)window.open(url,'_blank');});
+      alert('系統分享不支援，已下載全部 '+blobs.length+' 頁圖片（meeting-card-1.png 起），請用系統分享鍵或到 LINE 選照片一次選多頁傳出。');
+      return;
+    }
+  }
+  alert('全部 '+blobs.length+' 頁已逐頁分享完畢');
 }catch(e){alert('圖片產生失敗：'+(e&&e.message?e.message:e));}
 finally{acts.style.display='';var selBack=card.querySelector('.selcircle');if(selBack)selBack.style.display='';}
 };
@@ -737,7 +922,7 @@ finally{acts.style.display='';var selBack=card.querySelector('.selcircle');if(se
 <div id="editModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 id="editTitle" style="margin-top:0"></h3><div id="editFields"></div><div class="iconrow"><button class="iconbtn ok" id="editSave" aria-label="儲存" title="儲存">✓</button><button class="iconbtn" id="editCancel" aria-label="取消" title="取消">↩</button><button class="iconbtn danger" id="editDelete" aria-label="刪除" title="刪除">✖️</button></div></div></div>
 <div id="delModal" role="dialog" aria-modal="true"><div class="edit-box"><p id="delText">確定要刪除這一項嗎？</p><div class="iconrow"><button class="iconbtn danger" id="delConfirm" aria-label="確認刪除" title="確認刪除">✓</button><button class="iconbtn" id="delCancel" aria-label="取消" title="取消">↩</button></div></div></div>
 <div id="deletedModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0">已刪除的項目</h3><div id="deletedList" class="deleted-list"></div><div class="iconrow"><button class="modalbtn" id="deletedClose" type="button">關閉</button></div></div></div>
-<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackSeq" type="button">分享下一張（逐張到 LINE）</button><button class="modalbtn" id="batchFallbackDownload" type="button">下載全部圖片</button><button class="modalbtn" id="batchFallbackMulti" type="button">一次傳多張（非 LINE）</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
+<div id="batchFallbackModal" role="dialog" aria-modal="true"><div class="edit-box"><h3 style="margin-top:0" id="batchFallbackTitle">批次分享</h3><p id="batchFallbackText"></p><div class="iconrow" style="flex-wrap:wrap"><button class="modalbtn" id="batchFallbackSeq" type="button">分享下一頁（逐頁到 LINE）</button><button class="modalbtn" id="batchFallbackDownload" type="button">下載全部圖片</button><button class="modalbtn" id="batchFallbackMulti" type="button">一次傳多頁（非 LINE）</button><button class="modalbtn" id="batchFallbackClose" type="button">取消</button></div></div></div>
 <div id="undoBar" role="status"><span id="undoText"></span><span style="flex:1"></span><button id="undoRestore" type="button">復原</button><button id="undoClose" type="button">✕</button></div>
 <script>
 (function(){
@@ -929,7 +1114,7 @@ document.getElementById('batchFallbackClose').onclick=closeBatchFallback;
 function downloadAllFiles(files){
   if(!files||files.length===0){alert('沒有可下載的圖片');return;}
   files.forEach(function(f,i){var url=URL.createObjectURL(f);var a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();a.remove();if(i===0)window.open(url,'_blank');});
-  alert('已下載全部 '+files.length+' 張圖片，請到 LINE 群組用選照片一次選多張傳出；若瀏覽器擋住多個下載，請改用逐張分享到 LINE。');
+  alert('已下載全部 '+files.length+' 頁圖片，請到 LINE 群組用選照片一次選多頁傳出；若瀏覽器擋住多個下載，請改用逐頁分享到 LINE。');
 }
 document.getElementById('batchFallbackDownload').onclick=function(){var f=batchFiles||seqFiles;closeBatchFallback();downloadAllFiles(f);};
 document.getElementById('batchFallbackSeq').onclick=async function(){closeBatchFallback();await shareNextSequential();};
@@ -954,6 +1139,7 @@ async function generateSelectedFiles(){
   var wasCollapsed=!!(cBody&&cBody.classList.contains('collapsed'));
   if(wasCollapsed)cBody.classList.remove('collapsed');
   var files=[];var failed=[];
+  window.lastGeneratedCardCount=targets.length;
   try{
     for(var i=0;i<targets.length;i++){
       var card=targets[i].card;
@@ -966,15 +1152,15 @@ async function generateSelectedFiles(){
       if(acts)acts.style.display='none';
       if(selHide)selHide.style.display='none';
       try{
-        var cv=await html2canvas(card,{backgroundColor:'#ffffff',scale:2});
-        var blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
-        if(!blob)throw new Error('無法產生圖片檔案');
-        var titleEl=card.querySelector('h2');
-        var title=titleEl?titleEl.textContent:'第 '+(i+1)+' 張';
-        files.push(new File([blob],'meeting-card-'+String(i+1).padStart(2,'0')+'.png',{type:'image/png'}));
+        var blobs=await captureCardPages(card);
+        var base='meeting-card-'+String(i+1).padStart(2,'0');
+        blobs.forEach(function(b,pi){
+          var nm=blobs.length>1?base+'-'+(pi+1)+'.png':base+'.png';
+          files.push(new File([b],nm,{type:'image/png'}));
+        });
       }catch(e){
         var titleEl2=card.querySelector('h2');
-        failed.push('第 '+(i+1)+' 張「'+(titleEl2?titleEl2.textContent:'')+'」：'+(e&&e.message?e.message:e));
+        failed.push('第 '+(i+1)+' 張「'+(titleEl2?titleEl2.textContent:'')+'」：'+(e&&e.message?e.message:e)+'（整張未產生）');
       }finally{
         if(acts)acts.style.display=savedActs;
         if(selHide)selHide.style.display=savedSel;
@@ -995,11 +1181,11 @@ async function shareNextSequential(){
     if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){await navigator.share({files:[file]});}
     else{throw new Error('系統分享不支援');}
     seqIndex++;
-    if(seqIndex<seqFiles.length){openBatchFallback('逐張分享','第 '+seqIndex+'/'+seqFiles.length+' 張已分享，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」繼續傳到 LINE。',true,true,false);}
-    else{alert('全部 '+seqFiles.length+' 張已逐張分享完畢');sel=[];try{localStorage.removeItem(SELKEY);}catch(_){}cards.forEach(function(c){var b=c.querySelector('.selcircle');if(b){b.classList.remove('on');b.setAttribute('aria-pressed','false');}});updateCount();seqFiles=null;seqIndex=0;}
+    if(seqIndex<seqFiles.length){openBatchFallback('逐頁分享','第 '+seqIndex+'/'+seqFiles.length+' 頁已分享，尚餘 '+(seqFiles.length-seqIndex)+' 頁，點「分享下一頁」繼續傳到 LINE。',true,true,false);}
+    else{alert('全部 '+seqFiles.length+' 頁已逐頁分享完畢');sel=[];try{localStorage.removeItem(SELKEY);}catch(_){}cards.forEach(function(c){var b=c.querySelector('.selcircle');if(b){b.classList.remove('on');b.setAttribute('aria-pressed','false');}});updateCount();seqFiles=null;seqIndex=0;}
   }catch(e){
-    if(e && e.name==='AbortError'){openBatchFallback('逐張分享已取消','已分享 '+seqIndex+' 張，尚餘 '+(seqFiles.length-seqIndex)+' 張，點「分享下一張」可繼續；已取消的不算已分享。',true,true,false);}
-    else{openBatchFallback('逐張分享失敗','第 '+(seqIndex+1)+' 張分享失敗：'+(e&&e.message?e.message:e)+'，已分享 '+seqIndex+' 張，尚餘 '+(seqFiles.length-seqIndex)+' 張，可重試下一張或改用下載全部圖片。',true,true,false);}
+    if(e && e.name==='AbortError'){openBatchFallback('逐頁分享已取消','已分享 '+seqIndex+' 頁，尚餘 '+(seqFiles.length-seqIndex)+' 頁，點「分享下一頁」可繼續；已取消的不算已分享。',true,true,false);}
+    else{openBatchFallback('逐頁分享失敗','第 '+(seqIndex+1)+' 頁分享失敗：'+(e&&e.message?e.message:e)+'，已分享 '+seqIndex+' 頁，尚餘 '+(seqFiles.length-seqIndex)+' 頁，可重試下一頁或改用下載全部圖片。',true,true,false);}
   }
 }
 async function shareSelectedSequential(){
@@ -1007,7 +1193,7 @@ async function shareSelectedSequential(){
   try{files=await generateSelectedFiles();}catch(e){alert('批次分享失敗：'+(e&&e.message?e.message:e));return;}
   if(!files)return;
   batchFiles=files;seqFiles=files;seqIndex=0;
-  openBatchFallback('逐張分享到 LINE','已選 '+files.length+' 張，將逐張分享到 LINE：按一次分享一張，傳完按下一張。LINE 一次傳多張只會收到最後一張，所以這裡不一次傳多張。',true,true,false);
+  openBatchFallback('逐頁分享到 LINE','已選 '+(window.lastGeneratedCardCount||files.length)+' 張大卡，共 '+files.length+' 頁，將逐頁分享到 LINE：按一次分享一頁，傳完按下一頁。長卡會自動切成多頁。LINE 一次傳多頁只會收到最後一頁，所以這裡不一次傳多頁。',true,true,false);
 }
 async function shareSelectedMultiFile(){
   var files=batchFiles;
@@ -1023,7 +1209,7 @@ async function shareSelectedMultiFile(){
     throw new Error('系統不支援一次分享多張圖片');
   }catch(e){
     if(e && e.name==='AbortError')return;
-    openBatchFallback('一次傳多張不適用於 LINE','一次傳 '+files.length+' 張圖片不適用於 LINE：實機測試證明 LINE 只會收到最後一張，前面幾張不會到。請改用逐張分享到 LINE，或下載全部圖片後到 LINE 自己的選照片一次選多張傳出。',true,true,false);
+    openBatchFallback('一次傳多頁不適用於 LINE','一次傳 '+files.length+' 頁圖片不適用於 LINE：實機測試證明 LINE 只會收到最後一頁，前面幾頁不會到。請改用逐頁分享到 LINE，或下載全部圖片後到 LINE 自己的選照片一次選多頁傳出。',true,true,false);
   }
 }
 if(shareBtn)shareBtn.onclick=async function(){await shareSelectedSequential();};
@@ -1039,4 +1225,5 @@ if(shareDownloadBtn)shareDownloadBtn.onclick=async function(){var files;try{file
 <script src="weekly-gate.js"></script>
 <script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=document.body.classList.contains('weekly-approved')&&y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
 </body></html>
+
 
