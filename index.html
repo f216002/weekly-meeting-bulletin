@@ -25,6 +25,8 @@ h1{font-size:calc(var(--base,16px)*2.625);margin:8px 0 12px;color:#111}
 .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .actions button{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer}
 .cbody.collapsed{display:none}
+.row .v.collapsed{display:none}
+.row-toggle{background:#fff;color:#111;border:2px solid #333;border-radius:8px;padding:4px 10px;font-size:15px;cursor:pointer;margin:2px 0 0}
 .foot{color:#555;font-size:14px;margin-top:24px}
 
 .hint{color:#666;font-size:14px;margin:2px 0 10px}
@@ -418,7 +420,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="row"><div class="k">注意</div><div class="v">
 <div class="line">打開心靈鎖匙講座打開心靈鎖匙講座於週五下午13:30暫時關閉系統，會先進行造冊，造冊完成後，15:00會再重新開放報名。</div>
 </div></div>
-<div class="row"><div class="k">目前報名人數</div><div class="v">
+<div class="row"><div class="k">目前報名人數</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">崇正：應到乾1 坤1 合計2</div>
 <div class="line">中和014：應到乾0 坤0 合計0</div>
 <div class="line">中和081：應到乾0 坤0 合計0</div>
@@ -677,7 +679,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="line">壇主的孩子，年紀在國中以上，有求道即可報名</div>
 <div class="line">壇主的父母親，只要有求道，即可報名。(公堂不在此限)。</div>
 </div></div>
-<div class="row"><div class="k">目前報名人數</div><div class="v">
+<div class="row"><div class="k">目前報名人數</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">崇正：應到乾1 坤0 合計1</div>
 <div class="line">中和042：應到乾0 坤0 合計0</div>
 <div class="line">中和113：應到乾0 坤0 合計0</div>
@@ -1029,7 +1031,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="line">請各區用心準備一道120人份精緻料理。請回報給翁副領導士琇。</div>
 <div class="line">料理請勿重複，並請註明是否含蛋。</div>
 </div></div>
-<div class="row"><div class="k">料理表</div><div class="v">
+<div class="row"><div class="k">料理表</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">1 賢德001 翁晟航：麻辣素肉條(6盤)，不含蛋</div>
 <div class="line">39 中和062 陳志凱：薑炒芥菜(6盤)，青花椰菜(6盤)(廚房現炒)，不含蛋</div>
 <div class="line">2 中和001 黃文源：日式溏心蛋300顆，含蛋</div>
@@ -1128,7 +1130,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="line">9 中和051 54位</div>
 <div class="line">10 中和059 50位</div>
 </div></div>
-<div class="row"><div class="k">各區報名及出席大表</div><div class="v">
+<div class="row"><div class="k">各區報名及出席大表</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">崇正：應到乾1 坤1 合計2；11/8實到乾1 坤1 合計2</div>
 <div class="line">馬來030：應到乾0 坤0 合計0；11/8實到乾0 坤0 合計0</div>
 <div class="line">中和082：應到乾58 坤60 合計118；11/8實到乾57 坤59 合計116</div>
@@ -1589,7 +1591,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="row"><div class="k">簡章</div><div class="v">
 <div class="line">簡章，請閱附件18。</div>
 </div></div>
-<div class="row"><div class="k">目前報名人數</div><div class="v">
+<div class="row"><div class="k">目前報名人數</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">柬埔寨：應到乾0 坤1 合計1</div>
 <div class="line">中和036：應到乾0 坤0 合計0</div>
 <div class="line">中和085：應到乾0 坤0 合計0</div>
@@ -1797,7 +1799,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 </article>
 <article class="card C" data-cat="C">
 <span class="badge C">長期</span><h2>福利社</h2>
-<div class="row"><div class="k">內容</div><div class="v">
+<div class="row"><div class="k">內容</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">買一送一，素速睛（高效能）眼睛陪伴我們一輩子，保養，不一定要等到有感覺才開始。</div>
 <div class="line">素速睛Bling Bling：8大專利配方，添加木鱉果、高劑量葉黃素複方，全素可食，每天一粒，輕鬆補充日常所需。效期：2027／01。</div>
 <div class="line">買1送1，最後5組。</div>
@@ -1829,7 +1831,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 <div class="line">11月2日～11月8日異常班期清單，請閱附件6。</div>
 <div class="line">進階追蹤連結：https://advanced-attendance-teacher.tks-arno.chatgpt.site/</div>
 </div></div>
-<div class="row"><div class="k">各區出席大表</div><div class="v">
+<div class="row"><div class="k">各區出席大表</div><button type="button" class="row-toggle">展開</button><div class="v collapsed">
 <div class="line">精明015：禮行班出席83位</div>
 <div class="line">中和099：禮行班出席9位</div>
 <div class="line">印尼008：禮行班出席7位</div>
@@ -2083,7 +2085,7 @@ const cb=document.getElementById('cBody'),ct=document.getElementById('cToggle');
 if(ct){ct.onclick=()=>{const h=cb.classList.toggle('collapsed');ct.textContent=h?'展開':'收合'};}
 const sb=document.getElementById('shengxunBody'),st=document.getElementById('shengxunToggle');
 if(st){st.onclick=()=>{const h=sb.classList.toggle('collapsed');st.textContent=h?'展開':'收起'};}
-function cardText(card){var NL=String.fromCharCode(10);var t=card.querySelector('h2').innerText+NL+card.querySelector('.badge').innerText+NL;card.querySelectorAll('.row').forEach(function(r){if(r.style.display==='none')return;t+=r.querySelector('.k').innerText+NL;r.querySelectorAll('.line').forEach(function(l){t+=l.innerText+NL;});});return t;}
+function cardText(card){var NL=String.fromCharCode(10);var t=card.querySelector('h2').innerText+NL+card.querySelector('.badge').innerText+NL;card.querySelectorAll('.row').forEach(function(r){if(r.style.display==='none')return;t+=r.querySelector('.k').innerText+NL;r.querySelectorAll('.line').forEach(function(l){t+=l.textContent+NL;});});return t;}
 document.querySelectorAll('.card').forEach(card=>{
 card.querySelector('.copy').onclick=async()=>{if(!window.isWeeklyAdmin){return;}const t=cardText(card);try{await navigator.clipboard.writeText(t);alert('已複製文字')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('已複製文字')}};
 card.querySelector('.share').onclick=async()=>{if(!window.isWeeklyAdmin){return;}
@@ -2194,6 +2196,7 @@ document.getElementById('editSave').onclick=function(){
     var v=target.row.querySelector('.v');v.innerHTML='';
     lines.forEach(function(t){var d=document.createElement('div');d.className='line';d.textContent=t;v.appendChild(d);});
     state.editedRows[target.card.dataset.ci+':'+target.row.dataset.ri]=lines;
+    if(window.applyRowCollapse)window.applyRowCollapse(target.row);
   }else{
     var title=document.getElementById('editTitleInput').value;
     var badge=document.getElementById('editBadgeInput').value;
@@ -2259,6 +2262,32 @@ cards.forEach(function(card){
 });
 document.querySelectorAll('.card').forEach(function(c){c.addEventListener('contextmenu',function(e){e.preventDefault();});});
 try{var rescued=sessionStorage.getItem('bulletin-rescued');if(rescued){sessionStorage.removeItem('bulletin-rescued');var rp=rescued.indexOf('|');var rkind=rescued.slice(0,rp);var rid=rescued.slice(rp+1);if(rkind==='row'){var kp=rid.split(':');var rc=cards[Number(kp[0])];if(rc){var rr=rc.querySelectorAll('.row')[Number(kp[1])];if(rr){rr.scrollIntoView({block:'center'});rr.classList.add('rescued-flash');setTimeout(function(){rr.classList.remove('rescued-flash');},3000);}}}else if(rkind==='card'){var cc=cards[Number(rid)];if(cc){cc.scrollIntoView({block:'center'});cc.classList.add('rescued-flash');setTimeout(function(){cc.classList.remove('rescued-flash');},3000);}}}}catch(_){}
+})();
+</script>
+
+<script>
+/* 長小卡預設收合（RULES.md §19，2026-11-10 Cheng 定案）：欄位行文字合計超過 500 字者，
+   預設只顯示標題＋展開鍵；點一下展開全部，再點收合。生成器已對當週長卡寫入標記，
+   此處再補算一次，使本機編輯後跨過門檻的欄位、以及未帶標記的舊版 HTML 也同樣生效。
+   分享圖片與複製文字不受收合影響（分頁程式複製 .line 節點、複製文字讀 textContent）。 */
+(function(){
+  var LIMIT=500;
+  function rowLen(row){var v=row.querySelector('.v');if(!v)return 0;var n=0;v.querySelectorAll('.line').forEach(function(l){n+=l.textContent.length;});return n;}
+  function applyRow(row){
+    var v=row.querySelector('.v');if(!v)return;
+    var btn=row.querySelector('.row-toggle');
+    if(rowLen(row)>LIMIT){
+      if(!btn){btn=document.createElement('button');btn.type='button';btn.className='row-toggle';btn.textContent='展開';v.parentNode.insertBefore(btn,v);}
+      if(!v.classList.contains('collapsed'))v.classList.add('collapsed');
+      btn.textContent='展開';
+      if(!btn._bound){btn._bound=true;btn.onclick=function(){var h=v.classList.toggle('collapsed');btn.textContent=h?'展開':'收合';};}
+    }else{
+      if(btn)btn.remove();
+      v.classList.remove('collapsed');
+    }
+  }
+  document.querySelectorAll('.card .row').forEach(applyRow);
+  window.applyRowCollapse=applyRow;
 })();
 </script>
 
@@ -2413,6 +2442,7 @@ if(shareBtn)shareBtn.onclick=async function(){await shareSelectedSequential();};
 <script src="weekly-admin.js"></script>
 <script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
 </body></html>
+
 
 
 
