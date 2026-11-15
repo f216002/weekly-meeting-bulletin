@@ -196,3 +196,15 @@ sha: b0458d23fc8cb3abf7fdee76a67ef674fd76c057
 - 實作位置（兩處缺一不可，缺一處下週重建即失效）：(1) 生成器 `build_week1110.py` 的 `article()`：`sum(len(l)) > 500` 即寫入 `<button class="row-toggle">展開</button>` 與 `<div class="v collapsed">`；(2) 樣板 `index-base.html`：CSS `.row .v.collapsed{display:none}`＋`.row-toggle` 樣式、頁面 JS 補算（同門檻，`window.applyRowCollapse`，供本機編輯後與舊版 HTML 使用）、`cardText` 改讀 `textContent`、編輯儲存後重算。未來每週建置沿用同一門檻與同一寫法，不得自行改門檻。
 - 驗證：生成後逐行普查 201 張小卡，收合 ⟺ 超過 500 字，0 誤判；大卡 40 張、總行數 1180 行皆不變；6 支內嵌腳本皆通過 `node --check`；推送後以瀏覽器開正式站確認 7 張皆只顯示標題＋展開鍵、點開後內容完整。
 
+## §20 管理者編輯雲端同步（2026-11-15，Cheng 定案）
+
+- 背景：Cheng 於 2026-11-10 提出，管理者手機上長按改完後，其他瀏覽者看到的應該是改過的版面；當時查證：編輯只存管理者自己手機的 localStorage（鍵 `weekly-bulletin-edit-v1`），其他人看到的是倉庫原版。2026-11-15 他確認「照那個方案做」，並說本週已在手機上長按改過卡、但忘了是哪幾張。
+- 方案：新集合 `weekly_overrides`（與 V4、三寶完全隔離），文件 ID＝週次（本週 `2026-11-10`，下週 `2026-11-17`，各週互不干擾）。文件內容沿用本機狀態形狀（`deletedCards, deletedRows, editedRows, editedCards, deletedMeta`）＋`week, updatedBy, updatedAt`。讀：所有人可讀（配合公開檢視、不需登入）；寫：只限管理者 `f216002@gmail.com` 登入者，規則在伺服器端擋。
+- 載入順序：開頁先套用本機狀態，再讀雲端文件；有雲端文件就用它（同時蓋掉本機舊狀態），沒有就沿用本機狀態。雲端讀取失敗（離線、規則未發布）時頁面照常顯示本機／原版，不白屏。
+- 寫入：管理者每按一次儲存／刪除／復原，`persist()` 同時寫本機與雲端（寫雲端失敗不影響本機儲存、不跳錯誤）。「還原全部」同時刪除雲端文件（等刪除完成或 2 秒逾時才重整頁面）。
+- 規則片段（只加這一段、舊規則一字不動；由 Cheng 在 Firebase Console 親自合併貼上發布，助理不代發；規則未發布前雲端讀寫皆被拒，同步尚未生效）：
+  `match /weekly_overrides/{weekId} { allow get, list: if true; allow create, update, delete: if request.auth != null && request.auth.token.email != null && request.auth.token.email.lower() == 'f216002@gmail.com'; }`
+- 實作位置：(1) 樣板 `index-base.html`：加 `firebase-firestore-compat.js`（同版本 10.12.2）、編輯程式加雲端載入／寫入、原內容快照＋`applyState()` 重套（雲端版到達時可重套不疊加）、雲端載入後重算收合；(2) 生成器 `build_week1110.py`：生成頁寫入 `<body data-week="2026-11-10">`；(3) `weekly-admin.js`：初始化後暴露 `window.weeklyFirestore`。分享程式讀 localStorage 的兩處不改——雲端載入後本機會被雲端狀態蓋寫，故讀到的即是合併後狀態。
+- 遷移鐵律（2026-11-15 Cheng 忘了改過哪幾張，故定為鐵律）：手機上舊的本機編輯「絕不」自動上傳。雲端文件不存在時只沿用本機狀態；管理者須先在手機上點「已刪除」按鈕查看被刪卡片清單、確認是本週的卡，再由助理核對後搬上雲端（或管理者在新版上重做一次，之後每次編輯即自動同步）。上週的編輯按序號對不到本週，硬搬會改錯卡。
+- 500 字收合（§19）不受影響：雲端版套用後程式重算收合，編輯後跨過門檻同樣補上收合。
+
