@@ -94,6 +94,9 @@
 });
     }
     auth = window.firebase.auth();
+    // 雲端同步（RULES.md §20）：編輯程式用 window.weeklyFirestore 讀寫 weekly_overrides。
+    // Firestore SDK 未載入時保持 undefined，頁面退回本機編輯，不影響登入。
+    try { if (window.firebase.firestore) window.weeklyFirestore = window.firebase.firestore(); } catch (e) {}
   } catch (e) {
     if (signInBtn) signInBtn.onclick = function () { alert('登入功能暫時無法使用，請重新整理頁面。'); };
     return;
@@ -133,3 +136,4 @@
     }
   });
 })();
+
