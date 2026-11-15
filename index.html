@@ -86,7 +86,7 @@ body:not(.weekly-admin) #backToTop{display:none!important}
 .share-page .row{margin:6px 0!important}
 .share-page .line{margin:2px 0!important}
 .share-page .page-ind{font-size:16px!important}
-.share-page .src{font-size:16px!important}</style></head><body><div id="weeklyUtil" style="position:fixed;top:10px;right:12px;z-index:900;display:flex;gap:6px;align-items:center">
+.share-page .src{font-size:16px!important}</style></head><body data-week="2026-11-10"><div id="weeklyUtil" style="position:fixed;top:10px;right:12px;z-index:900;display:flex;gap:6px;align-items:center">
 <span id="weeklyUtilUser" title="" style="display:none;width:30px;height:30px;border-radius:50%;overflow:hidden;align-items:center;justify-content:center;background:#111;color:#fff;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15);flex:none"></span>
 <button id="weeklyUtilSignIn" type="button" style="cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;color:#111;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">管理者登入</button>
 <button id="weeklyUtilSignOut" type="button" style="display:none;cursor:pointer;border-radius:20px;border:2px solid #333;background:#fff;color:#111;padding:6px 14px;font:inherit;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.15)">登出</button>
@@ -2139,31 +2139,121 @@ finally{acts.style.display='';var selBack=card.querySelector('.selcircle');if(se
 <script>
 (function(){
 var LS='weekly-bulletin-edit-v1';
+/* 管理者編輯雲端同步（RULES.md §20，2026-11-10 Cheng 定案）：
+   本機 localStorage 仍是即時副本；管理者每按一次儲存／刪除／復原，
+   persist() 同時寫一份上雲端（weekly_overrides/{本週週次}），
+   所有檢視者開頁時先讀雲端版再顯示。寫入只限管理者，規則在伺服器端擋。
+   注意：手機上舊的本機編輯「不會」自動上傳——雲端文件不存在時，
+   只沿用本機狀態，舊編輯須由管理者確認是本週的卡再手動處理，
+   避免上週的序號錯搬到本週的卡上。 */
+var WEEK=null;
+try{WEEK=document.body.getAttribute('data-week')||null;}catch(_){}
 var state={deletedCards:[],deletedRows:[],editedRows:{},editedCards:{}};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(LS)||'{}'));}catch(_){}
 if(!state.deletedMeta)state.deletedMeta={rows:{},cards:{}};
-function persist(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(_){}}
+function cloudRef(){
+  try{
+    var db=window.weeklyFirestore;if(!db||!WEEK)return null;
+    return db.collection('weekly_overrides').doc(WEEK);
+  }catch(_){return null;}
+}
+function persist(){
+  try{localStorage.setItem(LS,JSON.stringify(state));}catch(_){}
+  try{
+    if(!window.isWeeklyAdmin)return;
+    var ref=cloudRef();if(!ref)return;
+    var email='';try{var u=window.firebase.auth().currentUser;if(u)email=u.email||'';}catch(_){}
+    var payload={deletedCards:state.deletedCards||[],deletedRows:state.deletedRows||[],editedRows:state.editedRows||{},editedCards:state.editedCards||{},deletedMeta:state.deletedMeta||{rows:{},cards:{}},week:WEEK,updatedBy:email};
+    try{payload.updatedAt=window.firebase.firestore.FieldValue.serverTimestamp();}catch(_){}
+    ref.set(payload).catch(function(){});
+  }catch(_){}
+}
 var NL10=String.fromCharCode(10);
 var cards=[];
+var orig=[];
 document.querySelectorAll('.card').forEach(function(card,ci){
   cards.push(card);card.dataset.ci=ci;
+  var o={display:card.style.display,title:'',badge:'',rows:[]};
+  var hh=card.querySelector('h2');if(hh)o.title=hh.textContent;
+  var bb=card.querySelector('.badge');if(bb)o.badge=bb.textContent;
   card.querySelectorAll('.row').forEach(function(row,ri){
     row.dataset.ri=ri;
-    var key=ci+':'+ri;
-    if(state.deletedRows.indexOf(key)>=0)row.style.display='none';
-    if(state.editedRows[key]){
-      var v=row.querySelector('.v');v.innerHTML='';
-      state.editedRows[key].forEach(function(t){var d=document.createElement('div');d.className='line';d.textContent=t;v.appendChild(d);});
-    }
+    var vv=row.querySelector('.v');
+    o.rows.push({display:row.style.display,html:vv?vv.innerHTML:''});
   });
-  if(state.deletedCards.indexOf(ci)>=0)card.style.display='none';
-  if(state.editedCards[ci]){
-    var h=card.querySelector('h2');if(h)h.textContent=state.editedCards[ci].title;
-    var b=card.querySelector('.badge');if(b)b.textContent=state.editedCards[ci].badge;
-  }
+  orig.push(o);
 });
+/* 先從快照還原原文，再套用編輯狀態；雲端版到達時可重複呼叫，不會疊加。 */
+function applyState(s){
+  cards.forEach(function(card,ci){
+    var o=orig[ci];if(!o)return;
+    card.style.display=o.display;
+    var h=card.querySelector('h2');if(h)h.textContent=o.title;
+    var b=card.querySelector('.badge');if(b)b.textContent=o.badge;
+    card.querySelectorAll('.row').forEach(function(row,ri){
+      var ro=o.rows[ri];if(!ro)return;
+      row.style.display=ro.display;
+      var v=row.querySelector('.v');if(v)v.innerHTML=ro.html;
+    });
+  });
+  (s.deletedRows||[]).forEach(function(key){
+    var p=key.split(':');var c=cards[Number(p[0])];if(!c)return;
+    var r=c.querySelectorAll('.row')[Number(p[1])];if(r)r.style.display='none';
+  });
+  Object.keys(s.editedRows||{}).forEach(function(key){
+    var p=key.split(':');var c=cards[Number(p[0])];if(!c)return;
+    var r=c.querySelectorAll('.row')[Number(p[1])];if(!r)return;
+    var v=r.querySelector('.v');if(!v)return;v.innerHTML='';
+    (s.editedRows[key]||[]).forEach(function(t){var d=document.createElement('div');d.className='line';d.textContent=t;v.appendChild(d);});
+  });
+  (s.deletedCards||[]).forEach(function(ci){var c=cards[ci];if(c)c.style.display='none';});
+  Object.keys(s.editedCards||{}).forEach(function(ci){
+    var c=cards[ci];if(!c)return;var ec=s.editedCards[ci];if(!ec)return;
+    var h=c.querySelector('h2');if(h)h.textContent=ec.title;
+    var b=c.querySelector('.badge');if(b)b.textContent=ec.badge;
+  });
+}
+applyState(state);
+window.weeklyEditState=state;
+/* 雲端版：weekly-admin.js 在後面才初始化 Firestore，等它就緒再讀。
+   有雲端文件就用它（同時蓋掉本機舊狀態）；沒有就沿用本機狀態。 */
+(function waitFirestore(){
+  var tries=0;
+  (function tick(){
+    if(window.weeklyFirestore){
+      var ref=cloudRef();if(!ref)return;
+      ref.get().then(function(doc){
+        if(!doc.exists)return;
+        var d=doc.data()||{};
+        var cs={deletedCards:[],deletedRows:[],editedRows:{},editedCards:{},deletedMeta:{rows:{},cards:{}}};
+        if(Array.isArray(d.deletedCards))cs.deletedCards=d.deletedCards;
+        if(Array.isArray(d.deletedRows))cs.deletedRows=d.deletedRows;
+        if(d.editedRows&&typeof d.editedRows==='object')cs.editedRows=d.editedRows;
+        if(d.editedCards&&typeof d.editedCards==='object')cs.editedCards=d.editedCards;
+        if(d.deletedMeta&&typeof d.deletedMeta==='object'){cs.deletedMeta={rows:d.deletedMeta.rows||{},cards:d.deletedMeta.cards||{}};}
+        state=cs;window.weeklyEditState=state;
+        try{localStorage.setItem(LS,JSON.stringify(state));}catch(_){}
+        applyState(state);updateDeletedBtn();
+        document.querySelectorAll('.card .row').forEach(function(r){if(window.applyRowCollapse)window.applyRowCollapse(r);});
+      }).catch(function(){});
+      return;
+    }
+    if(++tries>25)return;
+    setTimeout(tick,200);
+  })();
+})();
 var restore=document.getElementById('restoreAll');
-if(restore)restore.onclick=function(){if(!window.isWeeklyAdmin)return;try{localStorage.removeItem(LS);}catch(_){}location.reload();};
+if(restore)restore.onclick=function(){
+  if(!window.isWeeklyAdmin)return;
+  try{localStorage.removeItem(LS);}catch(_){}
+  var ref=cloudRef();
+  if(ref){
+    var done=false;
+    var go=function(){if(!done){done=true;location.reload();}};
+    try{ref.delete().then(go).catch(go);}catch(_){go();}
+    setTimeout(go,2000);
+  }else{location.reload();}
+};
 function escHtml2(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function cardTitleOf(card){var h=card.querySelector('h2');return h?h.textContent:'';}
 function rowMeta(card,row,key){var m=(state.deletedMeta.rows&&state.deletedMeta.rows[key])||null;if(m)return m;var k=row.querySelector('.k');var first=row.querySelector('.line');return{card:cardTitleOf(card),field:k?k.textContent:'',preview:first?first.textContent:'',edited:!!state.editedRows[key]};}
@@ -2439,10 +2529,10 @@ if(shareBtn)shareBtn.onclick=async function(){await shareSelectedSequential();};
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="weekly-admin.js"></script>
 <script>(function(){var b=document.getElementById('backToTop');if(!b)return;function upd(){var y=window.scrollY||window.pageYOffset||0;var show=y>300;if(show){b.classList.add('show')}else{b.classList.remove('show')}}window.addEventListener('scroll',upd,{passive:true});if(window.MutationObserver){new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']})}b.addEventListener('click',function(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}});upd();})();</script>
 </body></html>
-
 
 
 
